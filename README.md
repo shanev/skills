@@ -1,43 +1,37 @@
-# Tmux Task Runner - Claude Code Skill
+# Claude Code Skills
 
-Execute long-running tasks in tmux sessions with real-time monitoring. Tasks run in detached sessions with persistent logging and easy monitoring.
+A collection of skills for Claude Code to enhance development workflows.
 
-## Features
+## Available Skills
 
-- Detached tmux sessions for long-running tasks
-- Timestamped log files in `/tmp/`
-- Real-time output monitoring via `tmux capture-pane`
-- Session management (list, check, attach, kill)
-- Color-coded status output
+### Tmux Task Runner
+
+Run long-running tasks (builds, tests, deployments, dev servers) in monitored tmux sessions with persistent logging and real-time output monitoring.
 
 ## Installation
 
-### Plugin System (Recommended)
+### Option 1: Plugin System (Recommended)
+
+In Claude Code, run:
 
 ```
 /plugin marketplace add shanev/skills
 /plugin install tmux-task-runner@shanev-skills
 ```
 
-Then install tmux if needed:
-```bash
-# macOS
-brew install tmux
-
-# Ubuntu/Debian
-sudo apt-get install tmux
+Verify installation:
+```
+/help
 ```
 
-Verify with `/help` - the skill should appear in the list.
+The tmux-task-runner skill should appear in the skills list.
 
-### Manual Installation
+### Option 2: Manual Installation
 
 **Global (all projects):**
 ```bash
 cd ~/.claude/skills
 git clone https://github.com/shanev/skills.git
-cd skills/skills/tmux-task-runner
-chmod +x run.sh
 ```
 
 **Project-specific:**
@@ -45,61 +39,38 @@ chmod +x run.sh
 mkdir -p .claude/skills
 cd .claude/skills
 git clone https://github.com/shanev/skills.git
-cd skills/skills/tmux-task-runner
-chmod +x run.sh
+```
+
+## Prerequisites
+
+The tmux-task-runner skill requires tmux to be installed:
+
+```bash
+# macOS
+brew install tmux
+
+# Ubuntu/Debian
+sudo apt-get install tmux
+
+# Fedora/RHEL
+sudo dnf install tmux
 ```
 
 ## Usage
 
-Claude automatically invokes this skill for long-running tasks:
+Once installed, Claude automatically invokes skills when relevant:
 
-**User:** "Run the test suite in the background"
+**Example:**
+- **You:** "Run the test suite in the background"
+- **Claude:** Uses tmux-task-runner to execute tests in a monitored session
 
-**Claude:** Executes tests in a tmux session with monitoring commands
-
-### Manual Commands
-
-```bash
-# Run a task
-./run.sh run build "npm run build"
-
-# Check status
-./run.sh check task-build-1729519263
-
-# List all tasks
-./run.sh list
-
-# Attach to session
-./run.sh attach task-build-1729519263
-
-# Kill a task
-./run.sh kill task-build-1729519263
-
-# Get help
-./run.sh help
-```
-
-## Use Cases
-
-- Build processes (webpack, npm build, etc.)
-- Test suites (jest, pytest, etc.)
-- Development servers
-- Deployment scripts
-- Any command requiring background execution with monitoring
-
-## Requirements
-
-- Claude Code CLI
-- tmux
-- Bash shell
+See [skills/tmux-task-runner/EXAMPLES.md](skills/tmux-task-runner/EXAMPLES.md) for detailed examples.
 
 ## Troubleshooting
 
-**Skill not loading:** Run `/help` to verify, ensure `SKILL.md` exists in the skill directory
+**Skill not appearing:** Run `/help` in Claude Code to verify installation
 
-**Permission errors:** `chmod +x ~/.claude/skills/skills/skills/tmux-task-runner/run.sh`
-
-**tmux not found:** Install tmux using your package manager
+**tmux not found:** Install tmux using your system package manager (see Prerequisites)
 
 ## License
 
