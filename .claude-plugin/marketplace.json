@@ -1,0 +1,10 @@
+{
+  "displayName": "Tmux Task Runner",
+  "shortDescription": "Run long tasks in monitored tmux sessions",
+  "longDescription": "Execute long-running tasks in tmux sessions with real-time monitoring capabilities. Automatically spawns detached tmux sessions, captures output logs, and enables developers to monitor progress via log tailing or direct session attachment. Ideal for builds, tests, deployments, and any process requiring background execution with observable progress.",
+  "category": "development-tools",
+  "icon": "⚡",
+  "homepage": "https://github.com/shanev/skills",
+  "documentation": "https://github.com/shanev/skills/blob/main/README.md",
+  "examples": "https://github.com/shanev/skills/blob/main/skills/tmux-task-runner/EXAMPLES.md"
+}

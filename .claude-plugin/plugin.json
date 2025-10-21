@@ -1,0 +1,22 @@
+{
+  "name": "tmux-task-runner",
+  "version": "1.0.0",
+  "description": "Execute long-running tasks in tmux sessions with real-time monitoring capabilities",
+  "author": "Claude Code",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shanev/skills"
+  },
+  "skills": [
+    "skills/tmux-task-runner"
+  ],
+  "tags": [
+    "tmux",
+    "background-tasks",
+    "long-running",
+    "monitoring",
+    "sessions",
+    "devops"
+  ]
+}
