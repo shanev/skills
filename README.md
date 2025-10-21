@@ -10,36 +10,12 @@ Run long-running tasks (builds, tests, deployments, dev servers) in monitored tm
 
 ## Installation
 
-### Option 1: Plugin System (Recommended)
-
-In Claude Code, run:
-
 ```
 /plugin marketplace add shanev/skills
 /plugin install tmux-task-runner@shanev-skills
 ```
 
-Verify installation:
-```
-/help
-```
-
 The tmux-task-runner skill should appear in the skills list.
-
-### Option 2: Manual Installation
-
-**Global (all projects):**
-```bash
-cd ~/.claude/skills
-git clone https://github.com/shanev/skills.git
-```
-
-**Project-specific:**
-```bash
-mkdir -p .claude/skills
-cd .claude/skills
-git clone https://github.com/shanev/skills.git
-```
 
 ## Prerequisites
 
@@ -68,7 +44,7 @@ See [skills/tmux-task-runner/EXAMPLES.md](skills/tmux-task-runner/EXAMPLES.md) f
 
 ## Troubleshooting
 
-**Skill not appearing:** Run `/help` in Claude Code to verify installation
+**Skill not appearing:** Run `/plugin` in Claude Code to verify installation
 
 **tmux not found:** Install tmux using your system package manager (see Prerequisites)
 
