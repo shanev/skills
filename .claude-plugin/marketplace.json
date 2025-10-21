@@ -1,10 +1,28 @@
 {
-  "displayName": "Tmux Task Runner",
-  "shortDescription": "Run long tasks in monitored tmux sessions",
-  "longDescription": "Execute long-running tasks in tmux sessions with real-time monitoring capabilities. Automatically spawns detached tmux sessions, captures output logs, and enables developers to monitor progress via log tailing or direct session attachment. Ideal for builds, tests, deployments, and any process requiring background execution with observable progress.",
-  "category": "development-tools",
-  "icon": "⚡",
-  "homepage": "https://github.com/shanev/skills",
-  "documentation": "https://github.com/shanev/skills/blob/main/README.md",
-  "examples": "https://github.com/shanev/skills/blob/main/skills/tmux-task-runner/EXAMPLES.md"
+  "name": "skills",
+  "owner": {
+    "name": "Shane Vitarana",
+    "contact": "https://github.com/shanev"
+  },
+  "metadata": {
+    "description": "Claude Code skills for enhanced development workflows",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "tmux-task-runner",
+      "source": "./",
+      "description": "Execute long-running tasks in tmux sessions with real-time monitoring capabilities. Automatically spawns detached tmux sessions, captures output logs, and enables developers to monitor progress via log tailing or direct session attachment. Ideal for builds, tests, deployments, and any process requiring background execution with observable progress.",
+      "version": "1.0.0",
+      "author": "Shane Vitarana",
+      "license": "MIT",
+      "category": "development-tools",
+      "keywords": ["tmux", "background-tasks", "long-running", "monitoring", "sessions", "devops", "build", "test", "deployment"],
+      "homepage": "https://github.com/shanev/skills",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/shanev/skills"
+      }
+    }
+  ]
 }

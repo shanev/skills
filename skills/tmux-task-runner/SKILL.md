@@ -1,6 +1,6 @@
 ---
 name: tmux-task-runner
-description: Execute long-running tasks in tmux sessions with real-time monitoring capabilities. Automatically spawns detached tmux sessions, captures output logs, and enables developers to monitor progress via log tailing or direct session attachment. Ideal for builds, tests, deployments, and any process requiring background execution with observable progress.
+description: Run build processes, test suites, deployments, and development servers in monitored tmux sessions with persistent logging. Use when executing long-running tasks that need background execution with real-time monitoring, or when running commands like npm build, pytest, deployment scripts, or dev servers that should continue running while you work on other tasks.
 ---
 
 # Tmux Long-Running Task Skill
