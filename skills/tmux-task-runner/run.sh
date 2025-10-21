@@ -4,19 +4,11 @@
 
 set -e
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
-
 # Check if tmux is installed
 if ! command -v tmux &> /dev/null; then
-    echo -e "${RED}Error: tmux is not installed${NC}"
-    echo ""
+    echo "Error: tmux is not installed"
     echo "Install tmux:"
-    echo "  macOS:        brew install tmux"
+    echo "  macOS:         brew install tmux"
     echo "  Ubuntu/Debian: sudo apt-get install tmux"
     echo "  Fedora/RHEL:   sudo dnf install tmux"
     exit 1
@@ -29,7 +21,7 @@ run_task() {
     local command="$@"
 
     if [ -z "$command" ]; then
-        echo -e "${RED}Error: No command provided${NC}"
+        echo "Error: No command provided"
         echo "Usage: $0 <task-type> <command...>"
         exit 1
     fi
@@ -40,27 +32,24 @@ run_task() {
     # Create tmux session with logging
     tmux new-session -d -s "$session" "$command 2>&1 | tee $logfile; echo ''; echo 'Task completed. Session will remain open.'; echo 'Press Ctrl+b then d to detach, or Ctrl+c to close.'; read"
 
-    echo -e "${GREEN}✓ Task started in tmux session${NC}"
-    echo ""
-    echo -e "${BLUE}Session:${NC} $session"
-    echo -e "${BLUE}Log file:${NC} $logfile"
-    echo ""
-    echo -e "${YELLOW}Monitoring commands:${NC}"
+    echo "Task started in tmux session"
+    echo "Session: $session"
+    echo "Log file: $logfile"
+    echo "Monitoring commands:"
     echo "  tail -f $logfile                    # Follow log output"
     echo "  tmux attach-session -t $session     # Attach to session (Ctrl+b, d to detach)"
     echo "  tmux capture-pane -t $session -p    # View current output"
     echo "  tmux kill-session -t $session       # Stop task and close session"
-    echo ""
 
     # Wait a moment for task to start
     sleep 1
 
     # Show initial output
-    echo -e "${YELLOW}Initial output:${NC}"
+    echo "Initial output:"
     if tmux has-session -t "$session" 2>/dev/null; then
         tmux capture-pane -t "$session" -p -S -20 2>/dev/null || echo "(Waiting for output...)"
     else
-        echo -e "${RED}Session ended immediately - check if command is valid${NC}"
+        echo "Session ended immediately - check if command is valid"
         [ -f "$logfile" ] && cat "$logfile"
     fi
 }
@@ -70,29 +59,25 @@ check_session() {
     local session=$1
 
     if [ -z "$session" ]; then
-        echo -e "${RED}Error: No session name provided${NC}"
+        echo "Error: No session name provided"
         echo "Usage: $0 check <session-name>"
         exit 1
     fi
 
     if tmux has-session -t "$session" 2>/dev/null; then
-        echo -e "${GREEN}✓ Session '$session' is running${NC}"
-        echo ""
-        echo -e "${YELLOW}Recent output (last 30 lines):${NC}"
+        echo "Session '$session' is running"
+        echo "Recent output (last 30 lines):"
         tmux capture-pane -t "$session" -p -S -30
-        echo ""
-        echo -e "${BLUE}Session info:${NC}"
+        echo "Session info:"
         tmux list-sessions | grep "^$session"
     else
-        echo -e "${YELLOW}Session '$session' has completed or doesn't exist${NC}"
+        echo "Session '$session' has completed or doesn't exist"
 
         # Check for log file
         local logfile="/tmp/${session}.log"
         if [ -f "$logfile" ]; then
-            echo ""
-            echo -e "${BLUE}Log file found:${NC} $logfile"
-            echo ""
-            echo -e "${YELLOW}Last 30 lines of log:${NC}"
+            echo "Log file found: $logfile"
+            echo "Last 30 lines of log:"
             tail -30 "$logfile"
         fi
     fi
@@ -100,7 +85,7 @@ check_session() {
 
 # Function to list all task sessions
 list_tasks() {
-    echo -e "${BLUE}Active task sessions:${NC}"
+    echo "Active task sessions:"
     local sessions=$(tmux list-sessions 2>/dev/null | grep "^task-" || echo "")
 
     if [ -z "$sessions" ]; then
@@ -109,8 +94,7 @@ list_tasks() {
         echo "$sessions"
     fi
 
-    echo ""
-    echo -e "${BLUE}Available log files:${NC}"
+    echo "Available log files:"
     local logs=$(ls -t /tmp/task-*.log 2>/dev/null | head -10 || echo "")
 
     if [ -z "$logs" ]; then
@@ -125,9 +109,9 @@ kill_task() {
     local session=$1
 
     if [ -z "$session" ]; then
-        echo -e "${RED}Error: No session name provided${NC}"
+        echo "Error: No session name provided"
         echo "Usage: $0 kill <session-name>"
-        echo "       $0 kill-all  # Kill all task sessions"
+        echo "       $0 kill all  # Kill all task sessions"
         exit 1
     fi
 
@@ -137,18 +121,18 @@ kill_task() {
         if [ -z "$sessions" ]; then
             echo "No task sessions to kill"
         else
-            echo -e "${YELLOW}Killing all task sessions:${NC}"
+            echo "Killing all task sessions:"
             echo "$sessions" | while read -r s; do
                 tmux kill-session -t "$s"
-                echo "  ✓ Killed: $s"
+                echo "  Killed: $s"
             done
         fi
     else
         if tmux has-session -t "$session" 2>/dev/null; then
             tmux kill-session -t "$session"
-            echo -e "${GREEN}✓ Killed session: $session${NC}"
+            echo "Killed session: $session"
         else
-            echo -e "${RED}Session not found: $session${NC}"
+            echo "Session not found: $session"
             exit 1
         fi
     fi
@@ -159,18 +143,18 @@ attach_session() {
     local session=$1
 
     if [ -z "$session" ]; then
-        echo -e "${RED}Error: No session name provided${NC}"
+        echo "Error: No session name provided"
         echo "Usage: $0 attach <session-name>"
         exit 1
     fi
 
     if tmux has-session -t "$session" 2>/dev/null; then
-        echo -e "${BLUE}Attaching to session: $session${NC}"
-        echo -e "${YELLOW}Press Ctrl+b then d to detach without killing the session${NC}"
+        echo "Attaching to session: $session"
+        echo "Press Ctrl+b then d to detach without killing the session"
         sleep 1
         tmux attach-session -t "$session"
     else
-        echo -e "${RED}Session not found: $session${NC}"
+        echo "Session not found: $session"
         exit 1
     fi
 }
@@ -178,11 +162,11 @@ attach_session() {
 # Function to show help
 show_help() {
     cat << EOF
-${BLUE}Tmux Task Runner${NC}
+Tmux Task Runner
 
 Execute long-running tasks in managed tmux sessions with logging.
 
-${YELLOW}Usage:${NC}
+Usage:
   $0 run <task-type> <command...>    Run a command in a new tmux session
   $0 check <session-name>            Check status and output of a session
   $0 list                            List all active task sessions and logs
@@ -191,7 +175,7 @@ ${YELLOW}Usage:${NC}
   $0 kill all                        Kill all task sessions
   $0 help                            Show this help message
 
-${YELLOW}Examples:${NC}
+Examples:
   $0 run build "npm run build"
   $0 run test "pytest --verbose"
   $0 run server "python -m http.server 8000"
@@ -200,11 +184,11 @@ ${YELLOW}Examples:${NC}
   $0 list
   $0 kill task-build-1729519263
 
-${YELLOW}Task Types:${NC}
+Task Types:
   Common task types: build, test, deploy, server, script, job
   Use descriptive names to easily identify sessions later.
 
-${YELLOW}Monitoring:${NC}
+Monitoring:
   tail -f /tmp/task-NAME.log         Follow log output in real-time
   tmux attach-session -t NAME        Interactive session access
   tmux capture-pane -t NAME -p       Quick output snapshot
@@ -234,8 +218,7 @@ case "$1" in
         show_help
         ;;
     *)
-        echo -e "${RED}Unknown command: $1${NC}"
-        echo ""
+        echo "Unknown command: $1"
         show_help
         exit 1
         ;;
