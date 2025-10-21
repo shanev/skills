@@ -164,46 +164,6 @@ echo "Deployment started: $SESSION"
 echo "Monitor: tail -f $LOG"
 ```
 
-### Tasks with Timeouts
-
-**CRITICAL:** For tasks that may hang or run indefinitely, always use the `timeout` command to prevent stuck processes.
-
-```bash
-SESSION="task-build-$(date +%s)"
-LOG="/tmp/${SESSION}.log"
-
-# Use timeout command (kills after 30 minutes)
-tmux new-session -d -s "$SESSION" \
-  "timeout 30m npm run build 2>&1 | tee $LOG"
-
-echo "Build started with 30-minute timeout: $SESSION"
-echo "Monitor: tail -f $LOG"
-```
-
-Common timeout durations:
-- Build tasks: `timeout 30m` (30 minutes)
-- Test suites: `timeout 1h` (1 hour)
-- Deployments: `timeout 2h` (2 hours)
-- Long-running scripts: `timeout 4h` (4 hours)
-
-**When to use timeouts:**
-- CI/CD processes that should fail fast
-- Tasks prone to hanging (network operations, external API calls)
-- Resource-intensive operations that shouldn't run indefinitely
-- Any task where you expect a maximum duration
-
-**Example with custom timeout message:**
-
-```bash
-SESSION="task-test-$(date +%s)"
-LOG="/tmp/${SESSION}.log"
-
-tmux new-session -d -s "$SESSION" \
-  "timeout --preserve-status 1h npm test 2>&1 | tee $LOG || echo 'Task timed out after 1 hour'"
-
-echo "Tests started with 1-hour timeout: $SESSION"
-```
-
 ## Session Management
 
 ### List Active Sessions
