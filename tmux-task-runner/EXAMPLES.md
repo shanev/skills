@@ -136,6 +136,53 @@ watch -n 30 "tmux capture-pane -t task-train-1729519263 -p -S -10"
 ./run.sh kill all
 ```
 
+### Example 9: Using Timeouts to Prevent Hung Tasks
+
+**Build with timeout:**
+```bash
+# Build that should complete in 30 minutes max
+./run.sh run build "timeout 30m npm run build"
+
+# If the build hangs or takes too long, it will be killed after 30 minutes
+```
+
+**Tests with timeout:**
+```bash
+# Test suite with 1-hour timeout
+./run.sh run test "timeout 1h npm test -- --coverage"
+
+# Preserve exit status to get actual test results
+./run.sh run test "timeout --preserve-status 1h npm test"
+```
+
+**Deployment with timeout:**
+```bash
+# Deployment that should complete within 2 hours
+./run.sh run deploy "timeout 2h ./deploy.sh production"
+```
+
+**Network operations prone to hanging:**
+```bash
+# API integration test that might hang on network issues
+./run.sh run integration "timeout 15m npm run test:integration"
+
+# Docker build that might hang on pull
+./run.sh run docker "timeout 45m docker build -t myapp ."
+```
+
+**Custom timeout with error handling:**
+```bash
+# Run with timeout and custom error message
+./run.sh run build "timeout 30m npm run build || echo 'Build failed or timed out after 30 minutes'"
+```
+
+**Why use timeouts:**
+- Prevents stuck processes from consuming resources indefinitely
+- Fail fast in CI/CD environments
+- Detect hanging network operations early
+- Set expectations for maximum task duration
+- Automatically clean up stuck background tasks
+
 ## Real-World Scenarios
 
 ### Scenario 1: CI/CD Pipeline Simulation

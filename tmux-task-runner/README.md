@@ -104,6 +104,41 @@ tmux attach-session -t task-build-1729519263
 tmux capture-pane -t task-build-1729519263 -p
 ```
 
+## Preventing Hung Tasks
+
+Use the `timeout` command to automatically kill tasks that run too long or hang:
+
+```bash
+# Build with 30-minute timeout
+./run.sh run build "timeout 30m npm run build"
+
+# Tests with 1-hour timeout
+./run.sh run test "timeout 1h npm test"
+
+# Deployment with 2-hour timeout
+./run.sh run deploy "timeout 2h ./deploy.sh production"
+```
+
+**Recommended timeout durations:**
+- Build tasks: 30 minutes (`30m`)
+- Test suites: 1 hour (`1h`)
+- Deployments: 2 hours (`2h`)
+- Long-running scripts: 4 hours (`4h`)
+
+**When to use timeouts:**
+- CI/CD processes that should fail fast
+- Tasks with network operations that might hang
+- Resource-intensive operations
+- Any task where you expect a maximum duration
+
+**Preserve exit status:**
+```bash
+# Use --preserve-status to get the actual exit code
+./run.sh run test "timeout --preserve-status 1h npm test"
+```
+
+The timeout command will send SIGTERM after the specified duration. If the process doesn't exit, it sends SIGKILL after 9 more seconds.
+
 ## Troubleshooting
 
 **tmux not found:**
@@ -117,4 +152,7 @@ List all sessions: `tmux list-sessions` or `./run.sh list`
 
 **Too many old sessions:**
 Kill all task sessions: `./run.sh kill all`
+
+**Task appears hung:**
+Use the `timeout` command to automatically kill stuck processes (see "Preventing Hung Tasks" above)
 
