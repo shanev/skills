@@ -18,9 +18,9 @@ fi
 run_task() {
     local task_type=$1
     shift
-    local command="$@"
+    local command_args=("$@")
 
-    if [ -z "$command" ]; then
+    if [ ${#command_args[@]} -eq 0 ]; then
         echo "Error: No command provided"
         echo "Usage: $0 <task-type> <command...>"
         exit 1
@@ -28,13 +28,36 @@ run_task() {
 
     local session="task-${task_type}-$(date +%s)"
     local logfile="/tmp/${session}.log"
+    local status_file="/tmp/${session}.status"
+
+    rm -f "$status_file"
+
+    local command_string
+    command_string=$(printf "%q " "${command_args[@]}")
+    command_string="${command_string% }"
+
+    local tmux_command
+    tmux_command=$(cat <<EOF
+set -o pipefail
+${command_string} 2>&1 | tee "$logfile"
+exit_code=\${PIPESTATUS[0]}
+if [ \$exit_code -eq 0 ]; then
+  echo "Task completed successfully." | tee -a "$logfile"
+else
+  echo "Task failed with exit code \$exit_code." | tee -a "$logfile"
+fi
+echo \$exit_code > "$status_file"
+exit \$exit_code
+EOF
+)
 
     # Create tmux session with logging
-    tmux new-session -d -s "$session" "$command 2>&1 | tee $logfile; echo ''; echo 'Task completed. Session will remain open.'; echo 'Press Ctrl+b then d to detach, or Ctrl+c to close.'; read"
+    tmux new-session -d -s "$session" bash -lc "$tmux_command"
 
     echo "Task started in tmux session"
     echo "Session: $session"
     echo "Log file: $logfile"
+    echo "Status file: $status_file (0 = success, non-zero = failure)"
     echo "Monitoring commands:"
     echo "  tail -f $logfile                    # Follow log output"
     echo "  tmux attach-session -t $session     # Attach to session (Ctrl+b, d to detach)"
@@ -57,6 +80,7 @@ run_task() {
 # Function to check session status
 check_session() {
     local session=$1
+    local status_file="/tmp/${session}.status"
 
     if [ -z "$session" ]; then
         echo "Error: No session name provided"
@@ -66,12 +90,27 @@ check_session() {
 
     if tmux has-session -t "$session" 2>/dev/null; then
         echo "Session '$session' is running"
+        if [ -f "$status_file" ]; then
+            local exit_code
+            exit_code=$(cat "$status_file")
+            echo "Status note: exit code $exit_code recorded even though session is running."
+        fi
         echo "Recent output (last 30 lines):"
         tmux capture-pane -t "$session" -p -S -30
         echo "Session info:"
         tmux list-sessions | grep "^$session"
     else
         echo "Session '$session' has completed or doesn't exist"
+
+        if [ -f "$status_file" ]; then
+            local exit_code
+            exit_code=$(cat "$status_file")
+            if [ "$exit_code" -eq 0 ] 2>/dev/null; then
+                echo "Recorded exit status: success (0)"
+            else
+                echo "Recorded exit status: failure ($exit_code)"
+            fi
+        fi
 
         # Check for log file
         local logfile="/tmp/${session}.log"
@@ -102,6 +141,28 @@ list_tasks() {
     else
         echo "$logs"
     fi
+
+    echo "Recent task statuses:"
+    local status_files=$(ls -t /tmp/task-*.status 2>/dev/null | head -10 || echo "")
+
+    if [ -z "$status_files" ]; then
+        echo "  No status files found"
+    else
+        while IFS= read -r status; do
+            [ -z "$status" ] && continue
+            local exit_code name label
+            exit_code=$(cat "$status" 2>/dev/null)
+            name=$(basename "$status" .status)
+            if [ -z "$exit_code" ]; then
+                label="unknown"
+            elif [ "$exit_code" -eq 0 ] 2>/dev/null; then
+                label="success"
+            else
+                label="failure"
+            fi
+            echo "  $name: exit $exit_code (${label})"
+        done <<< "$status_files"
+    fi
 }
 
 # Function to kill task sessions
@@ -115,22 +176,27 @@ kill_task() {
         exit 1
     fi
 
-    if [ "$session" = "all" ]; then
-        local sessions=$(tmux list-sessions -F "#{session_name}" 2>/dev/null | grep "^task-" || echo "")
+        if [ "$session" = "all" ]; then
+            local sessions=$(tmux list-sessions -F "#{session_name}" 2>/dev/null | grep "^task-" || echo "")
 
-        if [ -z "$sessions" ]; then
-            echo "No task sessions to kill"
-        else
-            echo "Killing all task sessions:"
-            echo "$sessions" | while read -r s; do
-                tmux kill-session -t "$s"
-                echo "  Killed: $s"
-            done
-        fi
+            if [ -z "$sessions" ]; then
+                echo "No task sessions to kill"
+            else
+                echo "Killing all task sessions:"
+                echo "$sessions" | while read -r s; do
+                    tmux kill-session -t "$s"
+                    echo "  Killed: $s"
+                done
+                ls -1 /tmp/task-*.status 2>/dev/null | while read -r status; do
+                    [ -e "$status" ] && rm -f "$status"
+                done
+            fi
     else
         if tmux has-session -t "$session" 2>/dev/null; then
             tmux kill-session -t "$session"
             echo "Killed session: $session"
+            local status_file="/tmp/${session}.status"
+            rm -f "$status_file"
         else
             echo "Session not found: $session"
             exit 1
