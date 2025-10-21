@@ -14,32 +14,37 @@ This document provides practical examples of using the tmux-task-runner skill.
 # ✓ Task started in tmux session
 #
 # Session: task-build-1729519263
-# Log file: /tmp/task-build-1729519263.log
+# Log file: $LOG_DIR/task-build-1729519263.log   (LOG_DIR defaults to /tmp)
+# Status file: $STATUS_DIR/task-build-1729519263.status
+# Workdir: /Users/you/project
 #
 # Monitoring commands:
-#   tail -f /tmp/task-build-1729519263.log
+#   tail -f $LOG_DIR/task-build-1729519263.log
 #   tmux attach-session -t task-build-1729519263
+#   ./run.sh tail task-build-1729519263
 #   tmux kill-session -t task-build-1729519263
 ```
 
 Monitor the build:
 ```bash
-tail -f /tmp/task-build-1729519263.log
+tail -f "$LOG_DIR"/task-build-1729519263.log
 ```
 
 ### Example 2: Running Tests
 
 ```bash
-# Run pytest with verbose output
-./run.sh run test "pytest tests/ --verbose --cov"
+# Run pytest with verbose output and CI environment
+./run.sh run test --env NODE_ENV=ci "pytest tests/ --verbose --cov"
 
-# Or with npm/yarn
-./run.sh run test "npm test -- --coverage"
+# Or with npm/yarn (preserve exit status with coverage)
+./run.sh run test --notify "npm test -- --coverage"
 ```
 
 Check test status:
 ```bash
 ./run.sh check task-test-1729519263
+# Or review the recorded metadata:
+./run.sh status task-test-1729519263
 ```
 
 ### Example 3: Starting a Development Server
@@ -49,7 +54,7 @@ Check test status:
 ./run.sh run server "python -m http.server 8000"
 
 # Start a Node.js dev server
-./run.sh run server "npm run dev"
+./run.sh run server --workdir ./apps/frontend "npm run dev"
 
 # Start a Django dev server
 ./run.sh run server "python manage.py runserver"
@@ -65,7 +70,7 @@ Attach to the server session to see real-time requests:
 
 ```bash
 # Deploy to production
-./run.sh run deploy "./deploy.sh production"
+./run.sh run deploy --notify "./deploy.sh production"
 
 # Or with a deployment tool
 ./run.sh run deploy "terraform apply -auto-approve"
@@ -73,8 +78,8 @@ Attach to the server session to see real-time requests:
 
 Monitor deployment progress:
 ```bash
-# View last 50 lines of output
-tmux capture-pane -t task-deploy-1729519263 -p -S -50
+# Poll the last 80 lines every 5 seconds
+./run.sh tail task-deploy-1729519263 --interval 5 --lines 80
 ```
 
 ## Advanced Usage
@@ -109,8 +114,8 @@ tmux capture-pane -t task-deploy-1729519263 -p -S -50
 
 Check progress periodically:
 ```bash
-# Every 30 seconds, check the last 10 lines
-watch -n 30 "tmux capture-pane -t task-train-1729519263 -p -S -10"
+# Every 30 seconds, check the last 20 lines
+./run.sh tail task-train-1729519263 --interval 30 --lines 20
 ```
 
 ### Example 7: Database Migrations
@@ -155,7 +160,7 @@ watch -n 30 "tmux capture-pane -t task-train-1729519263 -p -S -10"
 '"
 
 # Monitor the pipeline
-tail -f /tmp/task-ci-*.log
+tail -f "$LOG_DIR"/task-ci-*.log
 ```
 
 ### Scenario 2: Monitoring API Load Testing
@@ -214,7 +219,9 @@ Your tests are now running in session `task-test-1729519263`.
 
 Monitor progress:
 ```bash
-tail -f /tmp/task-test-1729519263.log
+./skills/tmux-task-runner/run.sh tail task-test-1729519263 --lines 80
+# Or follow the log directly:
+tail -f "$LOG_DIR"/task-test-1729519263.log
 ```
 
 I'll check the initial output:
@@ -257,9 +264,9 @@ tmux-task list
 ```bash
 # Create a monitoring dashboard using tmux itself
 tmux new-session -s monitoring \; \
-  send-keys "tail -f /tmp/task-build-*.log" C-m \; \
+  send-keys "tail -f \"$LOG_DIR\"/task-build-*.log" C-m \; \
   split-window -v \; \
-  send-keys "tail -f /tmp/task-test-*.log" C-m \; \
+  send-keys "tail -f \"$LOG_DIR\"/task-test-*.log" C-m \; \
   split-window -h \; \
   send-keys "watch -n 5 './run.sh list'" C-m
 ```
@@ -271,17 +278,14 @@ tmux new-session -s monitoring \; \
 tmux capture-pane -t task-build-1729519263 -p -S - > build-output.txt
 
 # Or just use the log file
-cp /tmp/task-build-1729519263.log ./build-output.txt
+cp "$LOG_DIR"/task-build-1729519263.log ./build-output.txt
 ```
 
 ### Tip 4: Setting Up Notifications
 
 ```bash
-# Run a task and get notified when complete (macOS)
-./run.sh run build "npm run build && osascript -e 'display notification \"Build complete!\" with title \"Tmux Task\"'"
-
-# Linux with notify-send
-./run.sh run build "npm run build && notify-send 'Build complete!'"
+# Built-in flag handles macOS/Linux automatically
+./run.sh run build --notify "npm run build"
 ```
 
 ## Troubleshooting
@@ -293,29 +297,29 @@ cp /tmp/task-build-1729519263.log ./build-output.txt
 tmux list-sessions
 
 # Or check available logs
-ls -lt /tmp/task-*.log
+ls -lt "$LOG_DIR"/task-*.log
 ```
 
 ### Issue: Session closed unexpectedly
 
 ```bash
 # Check the log file for errors
-cat /tmp/task-build-1729519263.log
+cat "$LOG_DIR"/task-build-1729519263.log
 
 # Look for error messages or exit codes
-tail -50 /tmp/task-build-1729519263.log
+tail -50 "$LOG_DIR"/task-build-1729519263.log
 ```
 
 ### Issue: Want to keep session after task completes
 
-The run.sh script keeps sessions alive by default. The session will wait for you to press Ctrl+c after the task completes, so you can review the output.
+Sessions exit automatically once the command completes, but the log and status files remain for review (`./run.sh status <session>`).
 
 ### Issue: Too many old sessions
 
 ```bash
-# Kill all completed task sessions
+# Kill all active task sessions
 ./run.sh kill all
 
 # Clean up old log files (older than 7 days)
-find /tmp -name "task-*.log" -mtime +7 -delete
+find "$LOG_DIR" -name "task-*.log" -mtime +7 -delete
 ```

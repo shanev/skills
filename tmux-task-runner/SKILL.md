@@ -12,8 +12,9 @@ This skill provides a robust solution for running long-running tasks in tmux ses
 - **Detached execution**: Tasks run in isolated tmux sessions
 - **Real-time monitoring**: Capture and analyze logs via `tmux capture-pane`
 - **Developer control**: Attach to sessions for interactive debugging
-- **Persistent logging**: All output saved to timestamped log files
-- **Session management**: List, monitor, and clean up active sessions
+- **Persistent logging**: All output saved to timestamped log files (configurable via `LOG_DIR`)
+- **Status metadata**: Exit codes, timings, and environment details saved for later review
+- **Session management**: List, monitor, summarize, and clean up active sessions
 
 ## Critical Workflow
 
@@ -23,8 +24,8 @@ When a user requests execution of a long-running task (builds, tests, deployment
 2. **Create session**: Generate unique session name (e.g., `task-build-1729519263`)
 3. **Execute in tmux**: Run command in detached tmux session with logging
 4. **Monitor output**: Use `tmux capture-pane` to read session output
-5. **Report status**: Inform user of session name and monitoring options
-6. **Provide access**: Give user commands to tail logs or attach to session
+5. **Report status**: Inform user of session name, log/status file locations, and monitoring options
+6. **Provide access**: Give user commands to tail logs, use the `tail` helper, or attach to the session
 
 **CRITICAL:** Always check if tmux is installed before proceeding. If not found, inform the user to install it first.
 
@@ -32,9 +33,9 @@ When a user requests execution of a long-running task (builds, tests, deployment
 
 1. User requests a long-running task execution
 2. Skill creates a tmux session with descriptive name
-3. Task runs in detached session with output captured to log file
-4. Skill periodically checks session output using `tmux capture-pane`
-5. User can monitor via log tailing or attach to session directly
+3. Task runs in a detached session with output captured to a timestamped log in `${LOG_DIR:-/tmp}`
+4. Skill records status metadata (exit code, timings, command, overrides) in `${STATUS_DIR:-/tmp}`
+5. User can monitor via log tailing, the built-in `tail` helper, the `status` summary, or by attaching
 6. Session persists until task completes or user kills it
 
 ## Setup Instructions
@@ -72,38 +73,80 @@ try {
 }
 ```
 
-### Step 2: Create session and execute task
+### Step 2: Prepare session metadata
 
 ```bash
-# Generate unique session name
+# Generate unique session name and resolve directories
 SESSION_NAME="task-${TASK_TYPE}-$(date +%s)"
-LOG_FILE="/tmp/${SESSION_NAME}.log"
+LOG_DIR="${LOG_DIR:-/tmp}"
+STATUS_DIR="${STATUS_DIR:-/tmp}"
+LOG_FILE="$LOG_DIR/${SESSION_NAME}.log"
+STATUS_FILE="$STATUS_DIR/${SESSION_NAME}.status"
 
-# Create detached tmux session with logging
-tmux new-session -d -s "$SESSION_NAME" "your-command-here 2>&1 | tee $LOG_FILE"
+# Optional overrides
+WORKDIR="${WORKDIR:-$PWD}"                 # run command from a different folder
+ENV_OVERRIDES=("NODE_ENV=ci" "DEBUG=1")    # repeatable KEY=VALUE pairs
+NOTIFY=1                                   # enable desktop notifications if available
 ```
 
-### Step 3: Monitor session output
+### Step 3: Launch tmux session with logging and status tracking
 
 ```bash
-# Capture current pane content (last 100 lines)
-tmux capture-pane -t "$SESSION_NAME" -p -S -100
+tmux new-session -d -s "$SESSION_NAME" -c "$WORKDIR" bash -lc '
+  set -o pipefail
 
-# Check if session is still running
-tmux has-session -t "$SESSION_NAME" 2>/dev/null && echo "Running" || echo "Completed"
+  # Export requested environment overrides
+  export NODE_ENV=ci DEBUG=1
+
+  START_EPOCH=$(date +%s)
+  START_ISO=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+  your-command-here 2>&1 | tee "'"$LOG_FILE"'"
+  exit_code=${PIPESTATUS[0]}
+
+  END_EPOCH=$(date +%s)
+  END_ISO=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+  DURATION=$((END_EPOCH - START_EPOCH))
+
+  {
+    printf "exit_code=%q\n" "$exit_code"
+    printf "command=%q\n" "your-command-here"
+    printf "started_at_iso=%q\n" "$START_ISO"
+    printf "finished_at_iso=%q\n" "$END_ISO"
+    printf "duration_seconds=%q\n" "$DURATION"
+    printf "log_file=%q\n" "'"$LOG_FILE"'"
+    printf "workdir=%q\n" "'"$WORKDIR"'"
+    printf "env_vars=%q\n" "NODE_ENV=ci; DEBUG=1"
+  } > "'"$STATUS_FILE"'"
+
+  if [ '"$NOTIFY"' -eq 1 ]; then
+    message="[$SESSION_NAME] "
+    if [ "$exit_code" -eq 0 ]; then
+      message+="completed successfully"
+    else
+      message+="failed (exit $exit_code)"
+    fi
+    command -v notify-send >/dev/null 2>&1 && notify-send "tmux-task-runner" "$message"
+  fi
+
+  exit "$exit_code"
+'
 ```
 
-### Step 4: Provide monitoring commands to user
+### Step 4: Provide monitoring and summary commands
 
 ```bash
-# Tail the log file
-tail -f $LOG_FILE
+# Tail the log file directly
+tail -f "$LOG_FILE"
+
+# Poll output without attaching
+./run.sh tail "$SESSION_NAME" --interval 5 --lines 80
+
+# Summarize session metadata (exit status, duration, timestamps)
+./run.sh status "$SESSION_NAME"
 
 # Attach to the session (interactive)
-tmux attach-session -t $SESSION_NAME
-
-# List all active task sessions
-tmux list-sessions | grep "^task-"
+tmux attach-session -t "$SESSION_NAME"
 ```
 
 ## Common Patterns
@@ -111,58 +154,56 @@ tmux list-sessions | grep "^task-"
 ### Build Tasks
 
 ```bash
-SESSION="task-build-$(date +%s)"
-LOG="/tmp/${SESSION}.log"
-
-tmux new-session -d -s "$SESSION" \
-  "npm run build 2>&1 | tee $LOG"
-
-echo "Build started in tmux session: $SESSION"
-echo "Monitor: tail -f $LOG"
-echo "Attach: tmux attach-session -t $SESSION"
+./run.sh run build "npm run build"
+# Monitor tail:   ./run.sh tail task-build-... --interval 5
+# Summarize:      ./run.sh status task-build-...
 ```
 
 ### Test Suites
 
 ```bash
-SESSION="task-test-$(date +%s)"
-LOG="/tmp/${SESSION}.log"
-
-tmux new-session -d -s "$SESSION" \
-  "npm test -- --coverage 2>&1 | tee $LOG"
-
-echo "Tests running in session: $SESSION"
-echo "Watch progress: tail -f $LOG"
+./run.sh run test --env NODE_ENV=ci "npm test -- --coverage"
 ```
 
 ### Development Server
 
 ```bash
-SESSION="task-server-$(date +%s)"
-LOG="/tmp/${SESSION}.log"
-
-tmux new-session -d -s "$SESSION" \
-  "npm run dev 2>&1 | tee $LOG"
-
-# Wait a moment for server to start
-sleep 2
-
-# Check if server started successfully
-tmux capture-pane -t "$SESSION" -p -S -50 | tail -20
+./run.sh run server --workdir ./services/web "npm run dev"
 ```
 
 ### Deployment Scripts
 
 ```bash
-SESSION="task-deploy-$(date +%s)"
-LOG="/tmp/${SESSION}.log"
-
-tmux new-session -d -s "$SESSION" \
-  "./deploy.sh production 2>&1 | tee $LOG"
-
-echo "Deployment started: $SESSION"
-echo "Monitor: tail -f $LOG"
+./run.sh run deploy --notify "./deploy.sh production"
 ```
+
+## Run Script Enhancements
+
+### Working Directory Overrides
+- Use `--workdir <path>` to run the command from a different directory without wrapping the command in `cd ... &&`.
+- The script attempts to use `tmux new-session -c` when available and falls back to an inline `cd` if necessary.
+
+### Environment Variable Injection
+- Repeatable `--env KEY=VALUE` flags export additional environment variables for the task.
+- Variable names are validated to prevent invalid shell identifiers.
+
+### Completion Notifications
+- `--notify` triggers a best-effort desktop notification (`notify-send`, `osascript`, or `terminal-notifier`) when the job ends.
+- Notifications include the session name and whether the command succeeded.
+
+### Status Metadata and Summaries
+- Each run writes a status file to `${STATUS_DIR:-/tmp}` containing exit code, timestamps, duration, command, workdir, and env overrides.
+- `./run.sh status` lists recent runs; `./run.sh status <session>` prints detailed metadata and the latest log lines.
+- Status files enable tooling to expose job history without attaching to tmux directly.
+
+### Tail Helper
+- `./run.sh tail <session> [--interval N] [--lines M]` polls `tmux capture-pane` on a timer for lightweight monitoring.
+- Falls back to the log file if the session has already exited.
+
+### Configurable Directories and Pruning
+- Override `LOG_DIR` and `STATUS_DIR` to store artifacts outside `/tmp`.
+- `PRUNE_RETENTION_DAYS` (default 7) automatically removes stale log/status files.
+- `STATUS_SUMMARY_LIMIT`, `TAIL_DEFAULT_LINES`, and `TAIL_DEFAULT_INTERVAL` tune command defaults without editing the script.
 
 ## Session Management
 
@@ -269,7 +310,7 @@ esac
 - **CRITICAL:** Include timestamps in session names for easy identification
 - **CRITICAL:** Always provide log file paths to users for monitoring
 - Use descriptive task type prefixes (build, test, deploy, server, etc.)
-- Save logs to `/tmp` to avoid cluttering project directories
+- Use `LOG_DIR` (defaults to `/tmp`) to avoid cluttering project directories
 - Use `tmux capture-pane -p -S -100` to get reasonable output chunks
 - For very long output, save to file instead of displaying inline
 - Remind users they can attach to sessions for interactive debugging
@@ -299,17 +340,15 @@ esac
 **Claude:** I'll run your test suite in a tmux session so you can monitor it easily.
 
 ```bash
-SESSION="task-test-1729519263"
-LOG="/tmp/${SESSION}.log"
-
-tmux new-session -d -s "$SESSION" "npm test 2>&1 | tee $LOG"
+./run.sh run test --env NODE_ENV=ci "npm test -- --runInBand"
 ```
 
 Your tests are now running in the background. Here's how to monitor:
 
 **Monitor the logs:**
 ```bash
-tail -f /tmp/task-test-1729519263.log
+./run.sh tail task-test-1729519263 --interval 5 --lines 80
+# or tail -f "$LOG_DIR"/task-test-1729519263.log
 ```
 
 **Attach to the session:**
@@ -318,14 +357,12 @@ tmux attach-session -t task-test-1729519263
 ```
 (Press `Ctrl+b` then `d` to detach without stopping the tests)
 
-**Check current output:**
-Let me capture the current state...
-
+**Check current status summary:**
 ```bash
-tmux capture-pane -t task-test-1729519263 -p -S -50
+./run.sh status task-test-1729519263
 ```
 
-The tests are currently running. You can use the monitoring commands above to follow progress in real-time.
+The summary includes exit code, duration, timestamps, workdir, and environment overrides once the command finishes.
 
 ---
 
@@ -386,7 +423,7 @@ tmux new-session -d -s "$SESSION" bash -c "
 1. **Always provide monitoring commands** to users after starting a session
 2. **Use descriptive task types** in session names (build, test, deploy, etc.)
 3. **Capture initial output** after starting to confirm task began successfully
-4. **Save logs to /tmp** to keep project directories clean
+4. **Use LOG_DIR (defaults to /tmp)** to keep project directories clean
 5. **Include cleanup instructions** for when tasks complete
 6. **Check session status** before attempting operations
 7. **Provide both tail and attach options** for different monitoring preferences
