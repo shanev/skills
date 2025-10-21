@@ -1,18 +1,18 @@
 {
-  "name": "skills",
+  "name": "shanev-skills",
   "owner": {
     "name": "Shane Vitarana",
     "contact": "https://github.com/shanev"
   },
   "metadata": {
-    "description": "Claude Code skills for enhanced development workflows",
+    "description": "Collection of Claude Code skills for enhanced development workflows",
     "version": "1.0.0"
   },
   "plugins": [
     {
       "name": "tmux-task-runner",
       "source": "./",
-      "description": "Execute long-running tasks in tmux sessions with real-time monitoring capabilities. Automatically spawns detached tmux sessions, captures output logs, and enables developers to monitor progress via log tailing or direct session attachment. Ideal for builds, tests, deployments, and any process requiring background execution with observable progress.",
+      "description": "Run build processes, test suites, deployments, and development servers in monitored tmux sessions with persistent logging",
       "version": "1.0.0",
       "author": "Shane Vitarana",
       "license": "MIT",
@@ -22,7 +22,11 @@
       "repository": {
         "type": "git",
         "url": "https://github.com/shanev/skills"
-      }
+      },
+      "skills": [
+        "skills/tmux-task-runner"
+      ],
+      "strict": false
     }
   ]
 }

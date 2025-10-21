@@ -16,7 +16,7 @@ Execute long-running tasks in tmux sessions with real-time monitoring. Tasks run
 
 ```
 /plugin marketplace add shanev/skills
-/plugin install tmux-task-runner@skills
+/plugin install tmux-task-runner@shanev-skills
 ```
 
 Then install tmux if needed:
