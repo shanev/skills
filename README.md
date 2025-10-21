@@ -40,7 +40,7 @@ Once installed, Claude automatically invokes skills when relevant:
 - **You:** "Run the test suite in the background"
 - **Claude:** Uses tmux-task-runner to execute tests in a monitored session
 
-See [skills/tmux-task-runner/EXAMPLES.md](skills/tmux-task-runner/EXAMPLES.md) for detailed examples.
+See [tmux-task-runner/EXAMPLES.md](tmux-task-runner/EXAMPLES.md) for detailed examples.
 
 ## Troubleshooting
 
