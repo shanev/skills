@@ -53,7 +53,8 @@
         "./decomplect/agents/fcis-analyzer.md"
       ],
       "commands": [
-        "./decomplect/commands/decomplect.md"
+        "./decomplect/commands/decomplect.md",
+        "./decomplect/commands/unslopify.md"
       ],
       "strict": false
     }

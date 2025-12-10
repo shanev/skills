@@ -17,7 +17,7 @@ Multi-agent toolkit for analyzing code simplicity using Rich Hickey's decomplect
 Supports TypeScript, Go, and Rust.
 
 ```
-/decomplect
+/decomplect   # or /unslopify
 ```
 
 [Read more →](decomplect/README.md)

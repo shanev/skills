@@ -17,7 +17,8 @@
     "./agents/fcis-analyzer.md"
   ],
   "commands": [
-    "./commands/decomplect.md"
+    "./commands/decomplect.md",
+    "./commands/unslopify.md"
   ],
   "skills": [
     "./SKILL.md"
