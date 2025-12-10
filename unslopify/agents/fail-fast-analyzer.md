@@ -2,6 +2,7 @@
 name: fail-fast-analyzer
 description: Detects workarounds, silent failures, and defensive fallbacks that hide problems. Use when reviewing code for error handling quality, checking for fail-fast patterns, or ensuring errors surface immediately rather than being swallowed.
 model: inherit
+color: red
 ---
 
 # Fail-Fast Analyzer
