@@ -1,11 +1,11 @@
 ---
 name: decomplect
-description: Architectural code analysis using Rich Hickey's decomplection principles. Evaluates simplicity, functional core/imperative shell, and coupling. Use for design review, architectural assessment, or checking if code is "Rich Hickey approved."
+description: Architectural code analysis for design quality. Evaluates simplicity (Rich Hickey), functional core/imperative shell (Gary Bernhardt), and coupling (Constantine & Yourdon). Use for design review or architectural assessment.
 ---
 
 # Decomplect
 
-Architectural analysis inspired by Rich Hickey's simplicity philosophy.
+Architectural analysis for design quality.
 
 ## Usage
 
@@ -28,9 +28,9 @@ Architectural analysis inspired by Rich Hickey's simplicity philosophy.
 
 | Pillar | Focus |
 |--------|-------|
-| **Simplicity** | Values over state, decomplected concerns, explicit dependencies |
-| **FCIS** | Functional core (pure), imperative shell (I/O at edges) |
-| **Coupling** | High cohesion, low coupling, dependency direction |
+| **Simplicity** | Values over state, decomplected concerns |
+| **FCIS** | Functional core (pure), imperative shell (I/O) |
+| **Coupling** | High cohesion, low coupling |
 
 ## When to Use
 

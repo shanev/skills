@@ -6,7 +6,7 @@ A collection of skills for Claude Code to enhance development workflows.
 
 ### [Decomplect](decomplect/)
 
-Architectural code analysis inspired by Rich Hickey's simplicity philosophy.
+Architectural code analysis for design quality.
 
 ```
 /decomplect
@@ -14,7 +14,7 @@ Architectural code analysis inspired by Rich Hickey's simplicity philosophy.
 
 - **Simplicity** - Values over state, decomplected concerns
 - **FCIS** - Functional core, imperative shell
-- **Coupling** - Module boundaries, dependencies
+- **Coupling** - High cohesion, low coupling
 
 [Read more →](decomplect/README.md)
 

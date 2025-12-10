@@ -1,6 +1,6 @@
 # Decomplect
 
-Architectural code analysis inspired by Rich Hickey's simplicity philosophy.
+Architectural code analysis for design quality.
 
 ## Overview
 
@@ -14,19 +14,19 @@ Runs 3 analyzers in parallel to evaluate architectural quality.
 
 ## Analyzers
 
-| Analyzer | Question |
-|----------|----------|
-| **simplicity-analyzer** | Is this truly simple or just easy? |
-| **fcis-analyzer** | Is pure logic separated from I/O? |
-| **coupling-analyzer** | Are modules well-separated? |
+| Analyzer | Source | Question |
+|----------|--------|----------|
+| **simplicity-analyzer** | Rich Hickey | Is this truly simple or just easy? |
+| **fcis-analyzer** | Gary Bernhardt | Is pure logic separated from I/O? |
+| **coupling-analyzer** | Constantine & Yourdon | Are modules well-separated? |
 
 ## What It Checks
 
-| Pillar | Focus |
-|--------|-------|
-| **Simplicity** | Values over state, decomplected concerns, no hidden dependencies |
-| **FCIS** | Functional core (pure logic), imperative shell (I/O at edges) |
-| **Coupling** | High cohesion, low coupling, clean dependency direction |
+| Pillar | Source | Focus |
+|--------|--------|-------|
+| **Simplicity** | Rich Hickey (Simple Made Easy, 2011) | Values over state, decomplected concerns |
+| **FCIS** | Gary Bernhardt (Destroy All Software) | Functional core (pure), imperative shell (I/O) |
+| **Coupling** | Constantine & Yourdon (1970s) | High cohesion, low coupling |
 
 ## Usage
 
