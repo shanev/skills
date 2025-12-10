@@ -31,19 +31,29 @@
     {
       "name": "decomplect",
       "source": "./",
-      "description": "Analyze code for simplicity using Rich Hickey's decomplection principles. Reviews git diffs for high-cohesion/low-coupling, single responsibility, type strictness, and functional core/imperative shell patterns.",
-      "version": "1.0.0",
+      "description": "Multi-agent toolkit for code simplicity analysis using Rich Hickey's decomplection principles. 5 specialized agents for simplicity, coupling, SRP, type strictness, and functional core patterns.",
+      "version": "2.0.0",
       "author": {
         "name": "Shane Vitarana",
         "url": "https://github.com/shanev"
       },
       "license": "MIT",
       "category": "code-quality",
-      "keywords": ["code-review", "simplicity", "decomplect", "rich-hickey", "functional", "types", "coupling", "cohesion", "srp"],
+      "keywords": ["code-review", "simplicity", "decomplect", "rich-hickey", "functional", "types", "coupling", "cohesion", "srp", "multi-agent"],
       "homepage": "https://github.com/shanev/skills",
       "repository": "https://github.com/shanev/skills",
       "skills": [
         "./decomplect"
+      ],
+      "agents": [
+        "./decomplect/agents/simplicity-analyzer.md",
+        "./decomplect/agents/coupling-analyzer.md",
+        "./decomplect/agents/srp-analyzer.md",
+        "./decomplect/agents/type-strictness-analyzer.md",
+        "./decomplect/agents/fcis-analyzer.md"
+      ],
+      "commands": [
+        "./decomplect/commands/decomplect.md"
       ],
       "strict": false
     }

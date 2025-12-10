@@ -1,16 +1,18 @@
-# Decomplect Code Analysis Skill
+# Decomplect - Code Simplicity Analyzer
 
-Analyze your code for simplicity using Rich Hickey's decomplection principles.
+A multi-agent toolkit for analyzing code quality using Rich Hickey's decomplection principles.
 
-## What it Does
+## Overview
 
-This skill evaluates your code changes against 5 pillars of simplicity:
+Decomplect runs 5 specialized agents to evaluate your code against key simplicity principles:
 
-1. **Simplicity (Rich Hickey)** - Is the code truly simple or just easy?
-2. **High-Cohesion, Low-Coupling** - Are modules well-separated?
-3. **Single Responsibility** - Does each unit have one job?
-4. **Type Strictness** - Are types as strong as possible?
-5. **Functional Core, Imperative Shell** - Is logic separated from I/O?
+| Agent | Focus | Color |
+|-------|-------|-------|
+| **simplicity-analyzer** | Rich Hickey's decomplection principles | Purple |
+| **coupling-analyzer** | High-cohesion, low-coupling | Blue |
+| **srp-analyzer** | Single Responsibility Principle | Orange |
+| **type-strictness-analyzer** | Type safety and domain modeling | Green |
+| **fcis-analyzer** | Functional Core, Imperative Shell | Cyan |
 
 ## Supported Languages
 
@@ -20,56 +22,129 @@ This skill evaluates your code changes against 5 pillars of simplicity:
 
 ## Usage
 
-Ask Claude to analyze your code:
+### Full Analysis (All Agents)
 
 ```
+/decomplect
+```
+
+Runs all 5 agents in parallel and aggregates results (default behavior).
+
+### Individual Agents
+
+Run specific agents based on your focus:
+
+```
+"Check my code for simplicity issues"        → simplicity-analyzer
+"Review coupling and module boundaries"      → coupling-analyzer
+"Does this class have too many responsibilities?" → srp-analyzer
+"Check my types for strictness"              → type-strictness-analyzer
+"Is my business logic properly separated?"   → fcis-analyzer
+```
+
+### Natural Language
+
+```
+"Would Rich Hickey approve of this code?"
 "Review my staged changes for decomplection"
-"Would Rich Hickey approve of this PR?"
-"Check this code for simplicity issues"
-"Analyze my diff for coupling problems"
+"Check this PR for code quality"
 ```
 
 ## Output
 
-You'll get a structured report with:
+Each agent provides:
+- **Grade** (A-F)
+- **Findings** with file:line references
+- **Confidence scores** (only reports issues ≥80% confidence)
+- **Refactoring suggestions** with before/after code
 
-- Overall grade (A-F)
-- Per-pillar scores with key findings
-- Specific issues with file:line references
-- Refactoring suggestions with before/after code
+The `/decomplect` command aggregates all results into a unified report with:
+- Overall grade (weighted average)
+- Issues sorted by severity
 - Priority recommendations
 
-## Example
+## The 5 Pillars
+
+### 1. Simplicity (Rich Hickey)
+
+Is the code truly **simple** or just **easy**?
+
+- Values over state
+- Functions over methods
+- Explicit over implicit
+- Composition over inheritance
+
+### 2. Cohesion & Coupling
+
+Are modules well-separated?
+
+- High cohesion (related things together)
+- Low coupling (minimal dependencies)
+- Clear interfaces
+- Dependency inversion
+
+### 3. Single Responsibility
+
+Does each unit have one job?
+
+- One reason to change
+- No god classes
+- Focused functions
+- Clear naming
+
+### 4. Type Strictness
+
+Are types as strong as possible?
+
+- No `any` / `interface{}` / excessive `unwrap()`
+- Domain types (branded/newtype)
+- Discriminated unions
+- Explicit nullability
+
+### 5. Functional Core, Imperative Shell
+
+Is pure logic separated from I/O?
+
+- Pure functions for business logic
+- Side effects at the edges
+- Testable without mocks
+- Deterministic core
+
+## Installation
+
+```bash
+# In Claude Code
+/plugins add shanev-skills
+```
+
+## Architecture
 
 ```
-User: Review my staged changes
-
-Claude: # Decomplection Analysis
-
-## Overall Grade: C
-
-## Pillar Scores
-
-| Pillar | Grade | Key Finding |
-|--------|-------|-------------|
-| Simplicity | C | Mutable state in core logic |
-| Cohesion/Coupling | B | Minor coupling issues |
-| Single Responsibility | D | Handler does too much |
-| Type Strictness | B | Some `any` types |
-| Functional Core | D | I/O mixed with logic |
-
-## Findings & Refactoring Suggestions
-
-### 1. Simplicity: C
-
-**Issue:** `user-service.ts:45` - Mutation in business logic
-
-[Shows current code and suggested refactor...]
+decomplect/
+├── .claude-plugin/
+│   └── plugin.json           # Plugin configuration
+├── agents/
+│   ├── simplicity-analyzer.md
+│   ├── coupling-analyzer.md
+│   ├── srp-analyzer.md
+│   ├── type-strictness-analyzer.md
+│   └── fcis-analyzer.md
+├── commands/
+│   └── decomplect.md         # Orchestration command
+├── reference/
+│   ├── rich-hickey.md
+│   ├── coupling.md
+│   ├── srp.md
+│   ├── types.md
+│   └── fcis.md
+├── SKILL.md                  # Skill overview
+├── EXAMPLES.md               # Usage examples
+└── README.md
 ```
 
 ## Philosophy
 
-This skill is inspired by Rich Hickey's talks:
+Inspired by Rich Hickey's talks:
 
 - **Simple Made Easy** - Distinguishing simple from easy
 - **The Value of Values** - Preferring immutable values
@@ -80,15 +155,6 @@ The goal is code that is:
 - Easy to change without fear
 - Easy to test without mocks
 - Easy to reuse in different contexts
-
-## Installation
-
-This skill is part of the `shanev-skills` plugin:
-
-```bash
-# In Claude Code
-/plugin marketplace add shanev-skills
-```
 
 ## See Also
 
