@@ -31,7 +31,7 @@
     {
       "name": "decomplect",
       "source": "./",
-      "description": "Multi-agent toolkit for code simplicity analysis using Rich Hickey's decomplection principles. 5 specialized agents for simplicity, coupling, SRP, type strictness, and functional core patterns.",
+      "description": "Architectural code analysis using Rich Hickey's decomplection principles. Evaluates simplicity, functional core/imperative shell, and coupling.",
       "version": "2.0.0",
       "author": {
         "name": "Shane Vitarana",
@@ -39,7 +39,7 @@
       },
       "license": "MIT",
       "category": "code-quality",
-      "keywords": ["code-review", "simplicity", "decomplect", "rich-hickey", "functional", "types", "coupling", "cohesion", "srp", "multi-agent"],
+      "keywords": ["code-review", "simplicity", "decomplect", "rich-hickey", "functional", "coupling", "architecture"],
       "homepage": "https://github.com/shanev/skills",
       "repository": "https://github.com/shanev/skills",
       "skills": [
@@ -47,14 +47,38 @@
       ],
       "agents": [
         "./decomplect/agents/simplicity-analyzer.md",
-        "./decomplect/agents/coupling-analyzer.md",
-        "./decomplect/agents/srp-analyzer.md",
-        "./decomplect/agents/type-strictness-analyzer.md",
-        "./decomplect/agents/fcis-analyzer.md"
+        "./decomplect/agents/fcis-analyzer.md",
+        "./decomplect/agents/coupling-analyzer.md"
       ],
       "commands": [
-        "./decomplect/commands/decomplect.md",
-        "./decomplect/commands/unslopify.md"
+        "./decomplect/commands/decomplect.md"
+      ],
+      "strict": false
+    },
+    {
+      "name": "unslopify",
+      "source": "./",
+      "description": "Tactical code cleanup: type strictness, single responsibility, and fail-fast patterns. Detects sloppy code, workarounds, and silent failures.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Shane Vitarana",
+        "url": "https://github.com/shanev"
+      },
+      "license": "MIT",
+      "category": "code-quality",
+      "keywords": ["code-review", "types", "srp", "fail-fast", "cleanup", "sloppy", "workarounds"],
+      "homepage": "https://github.com/shanev/skills",
+      "repository": "https://github.com/shanev/skills",
+      "skills": [
+        "./unslopify"
+      ],
+      "agents": [
+        "./unslopify/agents/type-strictness-analyzer.md",
+        "./unslopify/agents/srp-analyzer.md",
+        "./unslopify/agents/fail-fast-analyzer.md"
+      ],
+      "commands": [
+        "./unslopify/commands/unslopify.md"
       ],
       "strict": false
     }

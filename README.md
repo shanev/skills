@@ -6,35 +6,46 @@ A collection of skills for Claude Code to enhance development workflows.
 
 ### [Decomplect](decomplect/)
 
-Multi-agent toolkit for analyzing code simplicity using Rich Hickey's decomplection principles. Runs 5 specialized agents in parallel to evaluate:
-
-- **Simplicity** - Values over state, functions over methods
-- **Cohesion/Coupling** - Module boundaries and dependencies
-- **Single Responsibility** - One reason to change per unit
-- **Type Strictness** - Strong types, no `any`/`interface{}`
-- **Functional Core** - Pure logic separated from I/O
-
-Supports TypeScript, Go, and Rust.
+Architectural code analysis inspired by Rich Hickey's simplicity philosophy.
 
 ```
-/decomplect   # or /unslopify
+/decomplect
 ```
+
+- **Simplicity** - Values over state, decomplected concerns
+- **FCIS** - Functional core, imperative shell
+- **Coupling** - Module boundaries, dependencies
 
 [Read more →](decomplect/README.md)
 
+### [Unslopify](unslopify/)
+
+Tactical code cleanup for immediate quality issues.
+
+```
+/unslopify
+```
+
+- **Type Strictness** - No `any`, domain types
+- **SRP** - Single responsibility, no god classes
+- **Fail-Fast** - No workarounds, no silent fallbacks
+
+[Read more →](unslopify/README.md)
+
 ### [Tmux Task Runner](tmux-task-runner/)
 
-Run long-running tasks (builds, tests, deployments, dev servers) in monitored tmux sessions with persistent logging and real-time output monitoring.
+Run long-running tasks in monitored tmux sessions with persistent logging.
 
 [Read more →](tmux-task-runner/README.md)
 
 ## Installation
 
-Install skills using Claude Code's plugin system:
-
-```
+```bash
 /plugin marketplace add shanev/skills
+
+# Install what you need
 /plugin install decomplect@shanev-skills
+/plugin install unslopify@shanev-skills
 /plugin install tmux-task-runner@shanev-skills
 ```
 
@@ -43,8 +54,13 @@ Verify installation:
 /plugin
 ```
 
-The installed skills should appear in the list.
-
 ## Usage
 
-Once installed, Claude automatically invokes skills when relevant to your requests. Each skill includes detailed documentation in its directory.
+Once installed, use the commands directly:
+
+```
+/decomplect    # Architectural analysis
+/unslopify     # Tactical cleanup
+```
+
+Or let Claude invoke them based on your requests.

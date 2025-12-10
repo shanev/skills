@@ -1,7 +1,7 @@
 {
   "name": "decomplect",
-  "version": "1.0.0",
-  "description": "Analyze code for simplicity using Rich Hickey's decomplection principles. Multi-agent toolkit for comprehensive code quality review.",
+  "version": "2.0.0",
+  "description": "Architectural code analysis using Rich Hickey's decomplection principles. Evaluates simplicity, functional core/imperative shell, and coupling.",
   "author": {
     "name": "Shane Vitarana",
     "url": "https://github.com/shanev"
@@ -11,14 +11,11 @@
   "repository": "https://github.com/shanev/skills",
   "agents": [
     "./agents/simplicity-analyzer.md",
-    "./agents/coupling-analyzer.md",
-    "./agents/srp-analyzer.md",
-    "./agents/type-strictness-analyzer.md",
-    "./agents/fcis-analyzer.md"
+    "./agents/fcis-analyzer.md",
+    "./agents/coupling-analyzer.md"
   ],
   "commands": [
-    "./commands/decomplect.md",
-    "./commands/unslopify.md"
+    "./commands/decomplect.md"
   ],
   "skills": [
     "./SKILL.md"
