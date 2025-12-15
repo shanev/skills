@@ -1,6 +1,6 @@
 ---
 name: unslopify
-description: Tactical code cleanup focusing on type strictness, single responsibility, and fail-fast patterns. Detects sloppy code, workarounds, and silent failures. Use for quick code quality checks.
+description: Tactical code cleanup focusing on type strictness, single responsibility, fail-fast patterns, and DRY. Detects sloppy code, workarounds, silent failures, and duplication. Use for quick code quality checks.
 ---
 
 # Unslopify Command
@@ -10,7 +10,7 @@ Tactical cleanup focused on immediate code quality issues.
 ## Usage
 
 ```
-/unslopify                # Run all 3 tactical analyzers in parallel
+/unslopify                # Run all 4 tactical analyzers in parallel
 /unslopify --sequential   # Run one at a time
 /unslopify --types        # Run specific analyzer only
 ```
@@ -22,13 +22,15 @@ Tactical cleanup focused on immediate code quality issues.
 | **type-strictness-analyzer** | Are types as strong as possible? | No `any`, domain types, null safety |
 | **srp-analyzer** | Does each unit have one job? | God classes, kitchen-sink functions |
 | **fail-fast-analyzer** | Do errors surface immediately? | No workarounds, no silent fallbacks |
+| **dry-analyzer** | Is there duplicated code? | Copy-paste, repeated logic, missed abstractions |
 
 ## Execution
 
-Launches 3 agents in parallel:
+Launches 4 agents in parallel:
 1. **type-strictness-analyzer** - Type safety and domain modeling
 2. **srp-analyzer** - Single Responsibility Principle
 3. **fail-fast-analyzer** - No workarounds, fail fast
+4. **dry-analyzer** - Don't Repeat Yourself
 
 ## What's "Sloppy"?
 
@@ -40,6 +42,7 @@ Launches 3 agents in parallel:
 | `?? defaultValue` everywhere | Fail on missing data |
 | `// HACK:` comments | Fix the root cause |
 | Silent fallbacks | Fail fast, fail loud |
+| Copy-pasted code blocks | Extracted helpers/utilities |
 
 ## Output
 
@@ -70,11 +73,12 @@ Launches 3 agents in parallel:
 
 | Flag | Analyzer |
 |------|----------|
-| (default) | All 3 in parallel |
-| `--sequential` | All 3, one at a time |
+| (default) | All 4 in parallel |
+| `--sequential` | All 4, one at a time |
 | `--types` | Type strictness only |
 | `--srp` | SRP only |
 | `--fail-fast` | Fail-fast only |
+| `--dry` | DRY only |
 
 ## When to Use
 

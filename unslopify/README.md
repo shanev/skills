@@ -10,7 +10,7 @@ Asks: *"Is this clean?"*
 /unslopify
 ```
 
-Runs 3 analyzers in parallel to detect sloppy code patterns.
+Runs 4 analyzers in parallel to detect sloppy code patterns.
 
 ## Analyzers
 
@@ -19,6 +19,7 @@ Runs 3 analyzers in parallel to detect sloppy code patterns.
 | **type-strictness-analyzer** | Are types as strong as possible? |
 | **srp-analyzer** | Does each unit have one job? |
 | **fail-fast-analyzer** | Do errors surface immediately? |
+| **dry-analyzer** | Is there duplicated code? |
 
 ## What's "Sloppy"?
 
@@ -30,15 +31,17 @@ Runs 3 analyzers in parallel to detect sloppy code patterns.
 | `// HACK:` comments | Fix the root cause |
 | Silent fallbacks | Fail fast, fail loud |
 | `?? defaultValue` everywhere | Fail on missing data |
+| Copy-pasted code blocks | Extracted helpers/utilities |
 
 ## Usage
 
 ```
-/unslopify                # All 3 analyzers in parallel
+/unslopify                # All 4 analyzers in parallel
 /unslopify --sequential   # One at a time
 /unslopify --types        # Type strictness only
 /unslopify --srp          # SRP only
 /unslopify --fail-fast    # Fail-fast only
+/unslopify --dry          # DRY only
 ```
 
 ## When to Use
@@ -68,7 +71,8 @@ unslopify/
 ├── agents/
 │   ├── type-strictness-analyzer.md
 │   ├── srp-analyzer.md
-│   └── fail-fast-analyzer.md
+│   ├── fail-fast-analyzer.md
+│   └── dry-analyzer.md
 ├── commands/
 │   └── unslopify.md
 └── reference/

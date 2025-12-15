@@ -58,8 +58,8 @@
     {
       "name": "unslopify",
       "source": "./",
-      "description": "Tactical code cleanup: type strictness, single responsibility, and fail-fast patterns. Detects sloppy code, workarounds, and silent failures.",
-      "version": "1.0.0",
+      "description": "Tactical code cleanup: type strictness, single responsibility, fail-fast patterns, and DRY. Detects sloppy code, workarounds, silent failures, and duplication.",
+      "version": "1.1.0",
       "author": {
         "name": "Shane Vitarana",
         "url": "https://github.com/shanev"
@@ -75,7 +75,8 @@
       "agents": [
         "./unslopify/agents/type-strictness-analyzer.md",
         "./unslopify/agents/srp-analyzer.md",
-        "./unslopify/agents/fail-fast-analyzer.md"
+        "./unslopify/agents/fail-fast-analyzer.md",
+        "./unslopify/agents/dry-analyzer.md"
       ],
       "commands": [
         "./unslopify/commands/unslopify.md"
