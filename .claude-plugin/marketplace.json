@@ -6,28 +6,9 @@
   },
   "metadata": {
     "description": "Collection of Claude Code skills for enhanced development workflows",
-    "version": "1.0.0"
+    "version": "1.1.0"
   },
   "plugins": [
-    {
-      "name": "tmux-task-runner",
-      "source": "./",
-      "description": "Run build processes, test suites, deployments, and development servers in monitored tmux sessions with persistent logging",
-      "version": "1.0.0",
-      "author": {
-        "name": "Shane Vitarana",
-        "url": "https://github.com/shanev"
-      },
-      "license": "MIT",
-      "category": "development-tools",
-      "keywords": ["tmux", "background-tasks", "long-running", "monitoring", "sessions", "devops", "build", "test", "deployment"],
-      "homepage": "https://github.com/shanev/skills",
-      "repository": "https://github.com/shanev/skills",
-      "skills": [
-        "./tmux-task-runner"
-      ],
-      "strict": false
-    },
     {
       "name": "decomplect",
       "source": "./",
