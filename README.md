@@ -32,12 +32,6 @@ Tactical code cleanup for immediate quality issues.
 
 [Read more →](unslopify/README.md)
 
-### [Tmux Task Runner](tmux-task-runner/)
-
-Run long-running tasks in monitored tmux sessions with persistent logging.
-
-[Read more →](tmux-task-runner/README.md)
-
 ## Installation
 
 ```bash
