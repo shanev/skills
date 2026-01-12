@@ -17,6 +17,33 @@ Strong types should:
 - **Enable refactoring** with confidence
 - **Make illegal states unrepresentable**
 
+## Scope
+
+Analyze ONLY the git diff output. Get the diff using this priority:
+
+1. **Unstaged changes:**
+```bash
+git diff HEAD
+```
+
+2. **If empty, staged changes:**
+```bash
+git diff --staged
+```
+
+3. **If empty, check if branch is ahead of origin/main:**
+```bash
+git log origin/main..HEAD --oneline
+```
+If there are commits ahead, get the branch diff:
+```bash
+git diff origin/main...HEAD
+```
+
+Filter for: `*.ts`, `*.tsx`, `*.go`, `*.rs`
+
+If all diffs are empty, report "No changes to analyze."
+
 ## TypeScript Issues to Detect
 
 ### 1. `any` Usage
