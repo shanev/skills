@@ -6,14 +6,14 @@
   },
   "metadata": {
     "description": "Collection of Claude Code skills for enhanced development workflows",
-    "version": "1.1.0"
+    "version": "1.2.0"
   },
   "plugins": [
     {
       "name": "decomplect",
       "source": "./",
       "description": "Architectural code analysis using Rich Hickey's decomplection principles. Evaluates simplicity, functional core/imperative shell, and coupling.",
-      "version": "2.0.0",
+      "version": "2.1.0",
       "author": {
         "name": "Shane Vitarana",
         "url": "https://github.com/shanev"
@@ -40,7 +40,7 @@
       "name": "unslopify",
       "source": "./",
       "description": "Tactical code cleanup: type strictness, single responsibility, fail-fast patterns, and DRY. Detects sloppy code, workarounds, silent failures, and duplication.",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": {
         "name": "Shane Vitarana",
         "url": "https://github.com/shanev"
