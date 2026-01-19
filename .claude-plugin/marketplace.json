@@ -4,65 +4,14 @@
     "name": "Shane Vitarana",
     "contact": "https://github.com/shanev"
   },
-  "metadata": {
-    "description": "Collection of Claude Code skills for enhanced development workflows",
-    "version": "1.2.0"
-  },
   "plugins": [
     {
       "name": "decomplect",
-      "source": "./",
-      "description": "Architectural code analysis using Rich Hickey's decomplection principles. Evaluates simplicity, functional core/imperative shell, and coupling.",
-      "version": "2.1.0",
-      "author": {
-        "name": "Shane Vitarana",
-        "url": "https://github.com/shanev"
-      },
-      "license": "MIT",
-      "category": "code-quality",
-      "keywords": ["code-review", "simplicity", "decomplect", "rich-hickey", "functional", "coupling", "architecture"],
-      "homepage": "https://github.com/shanev/skills",
-      "repository": "https://github.com/shanev/skills",
-      "skills": [
-        "./decomplect"
-      ],
-      "agents": [
-        "./decomplect/agents/simplicity-analyzer.md",
-        "./decomplect/agents/fcis-analyzer.md",
-        "./decomplect/agents/coupling-analyzer.md"
-      ],
-      "commands": [
-        "./decomplect/commands/decomplect.md"
-      ],
-      "strict": false
+      "source": "./decomplect"
     },
     {
       "name": "unslopify",
-      "source": "./",
-      "description": "Tactical code cleanup: type strictness, single responsibility, fail-fast patterns, and DRY. Detects sloppy code, workarounds, silent failures, and duplication.",
-      "version": "1.2.0",
-      "author": {
-        "name": "Shane Vitarana",
-        "url": "https://github.com/shanev"
-      },
-      "license": "MIT",
-      "category": "code-quality",
-      "keywords": ["code-review", "types", "srp", "fail-fast", "cleanup", "sloppy", "workarounds"],
-      "homepage": "https://github.com/shanev/skills",
-      "repository": "https://github.com/shanev/skills",
-      "skills": [
-        "./unslopify"
-      ],
-      "agents": [
-        "./unslopify/agents/type-strictness-analyzer.md",
-        "./unslopify/agents/srp-analyzer.md",
-        "./unslopify/agents/fail-fast-analyzer.md",
-        "./unslopify/agents/dry-analyzer.md"
-      ],
-      "commands": [
-        "./unslopify/commands/unslopify.md"
-      ],
-      "strict": false
+      "source": "./unslopify"
     }
   ]
 }

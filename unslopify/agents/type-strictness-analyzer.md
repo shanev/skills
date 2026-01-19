@@ -1,6 +1,6 @@
 ---
 name: type-strictness-analyzer
-description: Analyzes code for type system quality. Detects weak typing (any, interface{}), missing null checks, and opportunities for stronger domain types. Use when reviewing TypeScript, Go, or Rust code for type safety issues.
+description: Analyzes code for type system quality. Detects weak typing (any, interface{}, Any), missing null checks, and opportunities for stronger domain types. Use when reviewing TypeScript, Go, Rust, or Python code for type safety issues.
 model: inherit
 color: green
 ---
@@ -40,7 +40,7 @@ If there are commits ahead, get the branch diff:
 git diff origin/main...HEAD
 ```
 
-Filter for: `*.ts`, `*.tsx`, `*.go`, `*.rs`
+Filter for: `*.ts`, `*.tsx`, `*.go`, `*.rs`, `*.py`
 
 If all diffs are empty, report "No changes to analyze."
 
@@ -175,6 +175,85 @@ fn divide(a: i64, b: i64) -> i64 { a / b }
 
 // Good: Result
 fn divide(a: i64, b: i64) -> Result<i64, DivideByZero>
+```
+
+## Python Issues to Detect
+
+### 1. Missing Type Hints
+```python
+# Bad: no type hints
+def process(data):
+    return data.get("name")
+
+# Good: explicit types
+def process(data: dict[str, Any]) -> str | None:
+    return data.get("name")
+```
+
+### 2. `Any` Overuse
+```python
+# Bad: Any everywhere
+from typing import Any
+
+def transform(data: Any) -> Any:
+    return data
+
+# Good: specific types or generics
+from typing import TypeVar
+
+T = TypeVar('T')
+def transform(data: T) -> T:
+    return data
+```
+
+### 3. Missing Return Type
+```python
+# Bad: implicit return type
+def get_user(id: str):
+    return db.find(id)
+
+# Good: explicit return type
+def get_user(id: str) -> User | None:
+    return db.find(id)
+```
+
+### 4. `# type: ignore` Abuse
+```python
+# Bad: silencing type checker
+result = dangerous_call()  # type: ignore
+
+# Good: fix the actual type issue or use proper cast
+from typing import cast
+result = cast(ExpectedType, dangerous_call())
+```
+
+### 5. Primitive Obsession
+```python
+# Bad: stringly typed
+def transfer(from_account: str, to_account: str, amount: float) -> None:
+    pass
+
+# Good: NewType for domain concepts
+from typing import NewType
+
+AccountId = NewType('AccountId', str)
+Money = NewType('Money', int)  # cents
+
+def transfer(from_account: AccountId, to_account: AccountId, amount: Money) -> None:
+    pass
+```
+
+### 6. Optional Without Explicit None Handling
+```python
+# Bad: implicit None
+def get_name(user: User | None) -> str:
+    return user.name  # will crash if None!
+
+# Good: explicit None handling
+def get_name(user: User | None) -> str:
+    if user is None:
+        raise ValueError("User cannot be None")
+    return user.name
 ```
 
 ## Confidence Scoring

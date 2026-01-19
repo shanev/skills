@@ -1,6 +1,6 @@
 {
   "name": "decomplect",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Architectural code analysis using Rich Hickey's decomplection principles. Evaluates simplicity, functional core/imperative shell, and coupling.",
   "author": {
     "name": "Shane Vitarana",

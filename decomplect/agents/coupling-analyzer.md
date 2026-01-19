@@ -37,7 +37,7 @@ If there are commits ahead, get the branch diff:
 git diff origin/main...HEAD
 ```
 
-Filter for: `*.ts`, `*.tsx`, `*.go`, `*.rs`
+Filter for: `*.ts`, `*.tsx`, `*.go`, `*.rs`, `*.py`
 
 If all diffs are empty, report "No changes to analyze."
 
@@ -136,6 +136,93 @@ For each changed file, check:
 - Check module visibility (`pub` exposure)
 - Look for tight trait coupling
 - Verify crate dependencies are minimal
+
+**Python:**
+- Check for circular imports (common Python issue)
+- Look for fat base classes with too many methods
+- Verify dependencies flow in one direction
+- Check for excessive `from module import *`
+- Look for classes that know too much about other classes' internals
+- Prefer composition over inheritance
+- Use Protocol/ABC for interface segregation
+
+### Python Coupling Examples
+
+```python
+# Bad: circular import
+# file: user.py
+from order import Order  # imports order.py
+class User:
+    def get_orders(self) -> list[Order]: ...
+
+# file: order.py
+from user import User  # imports user.py - CIRCULAR!
+class Order:
+    def get_user(self) -> User: ...
+
+# Good: break cycle with Protocol or restructure
+# file: protocols.py
+from typing import Protocol
+
+class HasOrders(Protocol):
+    def get_orders(self) -> list["Order"]: ...
+
+class HasUser(Protocol):
+    def get_user(self) -> "User": ...
+```
+
+```python
+# Bad: content coupling - accessing internals
+class OrderService:
+    def __init__(self, user_service: UserService):
+        self.user_service = user_service
+
+    def get_user_email(self, user_id: str) -> str:
+        # Bad: reaching into internals
+        return self.user_service._db.users.find(user_id).email
+
+# Good: use public interface
+class OrderService:
+    def __init__(self, user_service: UserService):
+        self.user_service = user_service
+
+    def get_user_email(self, user_id: str) -> str:
+        user = self.user_service.get_user(user_id)
+        return user.email
+```
+
+```python
+# Bad: fat base class (low cohesion)
+class BaseService:
+    def log(self, msg): ...
+    def send_email(self, to, subject, body): ...
+    def cache_get(self, key): ...
+    def cache_set(self, key, value): ...
+    def validate(self, data): ...
+    def serialize(self, obj): ...
+
+# Good: composition with focused classes
+class UserService:
+    def __init__(
+        self,
+        logger: Logger,
+        email_client: EmailClient,
+        cache: Cache,
+    ):
+        self.logger = logger
+        self.email = email_client
+        self.cache = cache
+```
+
+```python
+# Bad: stamp coupling - passing whole object when only needing part
+def format_greeting(user: User) -> str:
+    return f"Hello, {user.name}"  # only needs name
+
+# Good: data coupling - pass only what's needed
+def format_greeting(name: str) -> str:
+    return f"Hello, {name}"
+```
 
 ## Confidence Scoring
 

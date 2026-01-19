@@ -58,7 +58,7 @@ If there are commits ahead, get the branch diff:
 git diff origin/main...HEAD
 ```
 
-Filter for: `*.ts`, `*.tsx`, `*.go`, `*.rs`
+Filter for: `*.ts`, `*.tsx`, `*.go`, `*.rs`, `*.py`
 
 If all diffs are empty, report "No changes to analyze."
 
@@ -172,6 +172,85 @@ For each changed function, ask:
 - Check for `async` in core functions
 - Look for `println!` in calculations
 - Verify `Utc::now()` / `rand` are injected
+
+**Python:**
+- Look for `async def` in pure business logic
+- Check for `print()`, `logging` in calculations
+- Verify `datetime.now()`, `random` are injected
+- Look for `requests`, `httpx`, `aiohttp` in core functions
+- Check for file operations (`open()`, `pathlib`) in business logic
+- Verify database connections aren't passed into pure functions
+
+### Python FCIS Examples
+
+```python
+# Bad: I/O mixed with business logic
+def process_order(order_id: str) -> dict:
+    order = db.orders.find(order_id)  # I/O
+    total = sum(item.price for item in order.items)  # Logic
+    tax = total * 0.1  # Logic
+    logger.info(f"Processed order {order_id}")  # I/O
+    db.orders.update(order_id, {"total": total + tax})  # I/O
+    return {"total": total + tax}
+
+# Good: separated
+def calculate_order_total(items: list[Item]) -> Money:
+    """Pure function - no I/O"""
+    return sum(item.price for item in items)
+
+def calculate_tax(amount: Money, rate: float = 0.1) -> Money:
+    """Pure function - no I/O"""
+    return amount * rate
+
+async def process_order(order_id: str) -> dict:
+    """Imperative shell - orchestrates I/O"""
+    order = await db.orders.find(order_id)
+    total = calculate_order_total(order.items)
+    tax = calculate_tax(total)
+    await db.orders.update(order_id, {"total": total + tax})
+    return {"total": total + tax}
+```
+
+```python
+# Bad: non-determinism in core
+def create_user(name: str, email: str) -> User:
+    return User(
+        id=uuid.uuid4(),  # Non-deterministic!
+        name=name,
+        email=email,
+        created_at=datetime.now(),  # Non-deterministic!
+    )
+
+# Good: inject non-determinism
+def create_user(
+    id: UUID,
+    name: str,
+    email: str,
+    created_at: datetime,
+) -> User:
+    """Pure function - all inputs provided"""
+    return User(id=id, name=name, email=email, created_at=created_at)
+
+# Shell provides the non-deterministic values
+def handle_create_user(name: str, email: str) -> User:
+    return create_user(
+        id=uuid.uuid4(),
+        name=name,
+        email=email,
+        created_at=datetime.now(),
+    )
+```
+
+```python
+# Bad: logging in pure function
+def validate_email(email: str) -> bool:
+    logger.debug(f"Validating email: {email}")  # Side effect!
+    return "@" in email and "." in email.split("@")[1]
+
+# Good: truly pure
+def validate_email(email: str) -> bool:
+    return "@" in email and "." in email.split("@")[1]
+```
 
 ## Confidence Scoring
 

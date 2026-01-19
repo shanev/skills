@@ -39,7 +39,7 @@ If there are commits ahead, get the branch diff:
 git diff origin/main...HEAD
 ```
 
-Filter for: `*.ts`, `*.tsx`, `*.go`, `*.rs`
+Filter for: `*.ts`, `*.tsx`, `*.go`, `*.rs`, `*.py`
 
 If all diffs are empty, report "No changes to analyze."
 
@@ -133,6 +133,60 @@ For each changed function/type/module, ask:
 - Check impl block sizes
 - Look for modules mixing domains
 - Verify traits are focused
+
+**Python:**
+- Check class method count and class length
+- Look for modules mixing unrelated functionality
+- Verify functions aren't doing I/O + logic + formatting
+- Check for "god modules" (files > 500 lines with mixed concerns)
+- Look for classes that should be plain functions or dataclasses
+
+### Python SRP Examples
+
+```python
+# Bad: god class doing everything
+class UserService:
+    def create_user(self): ...
+    def send_welcome_email(self): ...
+    def generate_report(self): ...
+    def backup_to_s3(self): ...
+    def validate_password(self): ...
+
+# Good: separated concerns
+class UserRepository:
+    def create(self, user: User) -> User: ...
+
+class EmailService:
+    def send_welcome(self, user: User): ...
+
+class UserReportGenerator:
+    def generate(self, user: User) -> Report: ...
+```
+
+```python
+# Bad: function doing too much
+def handle_order(request):
+    # Parse request
+    data = json.loads(request.body)
+    # Validate
+    if not data.get("items"):
+        raise ValueError("No items")
+    # Calculate
+    total = sum(item["price"] for item in data["items"])
+    tax = total * 0.1
+    # Save
+    db.orders.insert({"total": total + tax, ...})
+    # Notify
+    send_email(data["email"], "Order confirmed")
+    return {"status": "ok"}
+
+# Good: separated
+def parse_order_request(request) -> OrderData: ...
+def validate_order(data: OrderData) -> None: ...
+def calculate_order_total(items: list[Item]) -> Money: ...
+def save_order(order: Order) -> OrderId: ...
+def notify_customer(email: str, order_id: OrderId): ...
+```
 
 ## Confidence Scoring
 

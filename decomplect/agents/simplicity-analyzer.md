@@ -38,7 +38,7 @@ If there are commits ahead, get the branch diff:
 git diff origin/main...HEAD
 ```
 
-Filter for: `*.ts`, `*.tsx`, `*.go`, `*.rs`
+Filter for: `*.ts`, `*.tsx`, `*.go`, `*.rs`, `*.py`
 
 If all diffs are empty, report "No changes to analyze."
 
@@ -90,6 +90,74 @@ For each changed file, ask:
 - Minimize `mut` bindings
 - Leverage ownership for state management
 - Use `iter()` chains over manual loops
+
+**Python:**
+- Prefer `@dataclass(frozen=True)` for immutable data
+- Avoid mutable default arguments (the classic `def foo(items=[])` bug)
+- Use pure functions over methods with `self` mutation
+- Prefer comprehensions and `map`/`filter` over loops with append
+- Avoid global state and module-level mutable variables
+- Use `NamedTuple` or `TypedDict` for structured data instead of plain dicts
+
+### Python Simplicity Examples
+
+```python
+# Bad: mutable default argument (complected: value + place)
+def add_item(item, items=[]):
+    items.append(item)
+    return items
+
+# Good: explicit None check
+def add_item(item, items=None):
+    if items is None:
+        items = []
+    return [*items, item]  # return new list
+```
+
+```python
+# Bad: class with hidden state mutation
+class Calculator:
+    def __init__(self):
+        self.result = 0
+
+    def add(self, x):
+        self.result += x  # hidden mutation
+        return self
+
+# Good: pure function, values not state
+def add(a: int, b: int) -> int:
+    return a + b
+```
+
+```python
+# Bad: global mutable state
+_cache = {}  # module-level mutable
+
+def get_user(id: str) -> User:
+    if id not in _cache:
+        _cache[id] = db.find(id)  # hidden side effect
+    return _cache[id]
+
+# Good: explicit cache injection
+def get_user(id: str, cache: dict[str, User]) -> tuple[User, dict[str, User]]:
+    if id in cache:
+        return cache[id], cache
+    user = db.find(id)
+    return user, {**cache, id: user}
+```
+
+```python
+# Bad: mutation in loop
+def transform(items):
+    result = []
+    for item in items:
+        result.append(item.upper())  # mutation
+    return result
+
+# Good: comprehension (declarative)
+def transform(items):
+    return [item.upper() for item in items]
+```
 
 ## Confidence Scoring
 

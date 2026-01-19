@@ -41,7 +41,7 @@ If there are commits ahead, get the branch diff:
 git diff origin/main...HEAD
 ```
 
-Filter for: `*.ts`, `*.tsx`, `*.go`, `*.rs`
+Filter for: `*.ts`, `*.tsx`, `*.go`, `*.rs`, `*.py`
 
 If all diffs are empty, report "No changes to analyze."
 
@@ -196,6 +196,85 @@ let count = parse_count(input).unwrap_or_else(|e| {
 });
 ```
 
+### 8. Python: Bare Except Clauses
+
+```python
+# Bad: catches everything including KeyboardInterrupt, SystemExit
+try:
+    risky_operation()
+except:
+    pass  # silently swallowed
+
+# Bad: too broad
+try:
+    risky_operation()
+except Exception:
+    return None  # hides all errors
+
+# Good: specific exceptions
+try:
+    risky_operation()
+except ValueError as e:
+    logger.error(f"Invalid value: {e}")
+    raise
+```
+
+### 9. Python: Silent Exception Handling
+
+```python
+# Bad: pass in except
+try:
+    data = json.loads(raw)
+except json.JSONDecodeError:
+    pass  # data is now undefined!
+
+# Bad: return default without logging
+def get_config(key: str) -> str:
+    try:
+        return config[key]
+    except KeyError:
+        return ""  # hides missing config
+
+# Good: fail explicitly
+def get_config(key: str) -> str:
+    try:
+        return config[key]
+    except KeyError:
+        raise ConfigError(f"Missing required config: {key}")
+```
+
+### 10. Python: getattr/get with Silent Defaults
+
+```python
+# Bad: hiding missing attributes
+value = getattr(obj, "name", None)  # why might name be missing?
+data = config.get("setting", {})  # masks missing config
+
+# Good: fail on required values
+if not hasattr(obj, "name"):
+    raise AttributeError(f"Object missing required 'name' attribute")
+value = obj.name
+
+# Or explicit optional handling
+if "setting" not in config:
+    raise ConfigError("Missing required 'setting' in config")
+```
+
+### 11. Python: Assertions Disabled in Production
+
+```python
+# Bad: assertions can be disabled with -O flag
+def process(data):
+    assert data is not None  # skipped in production!
+    return data.value
+
+# Good: explicit validation
+def process(data):
+    if data is None:
+        raise ValueError("data cannot be None")
+    return data.value
+```
+
 ## Code Smells to Flag
 
 | Smell | Why It's Bad |
@@ -208,6 +287,10 @@ let count = parse_count(input).unwrap_or_else(|e| {
 | `// TODO: fix this properly` | Unaddressed issues |
 | Infinite retry loops | Never surfaces failures |
 | `recover()` without re-panic | Swallows panics |
+| `except:` or `except Exception: pass` | Python catches everything |
+| `.get(key, default)` for required values | Hides missing data |
+| `getattr(obj, attr, None)` patterns | Masks missing attributes |
+| `assert` for validation | Disabled in production |
 
 ## Confidence Scoring
 
