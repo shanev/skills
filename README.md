@@ -32,6 +32,21 @@ Tactical code cleanup for immediate quality issues.
 
 [Read more →](unslopify/README.md)
 
+### [Codex Review Loop](codex-review-loop/)
+
+Automated review-and-fix loop for Codex CLI.
+
+```bash
+./review-loop.sh
+```
+
+Runs `/review`, fixes issues, and repeats until clean (max 3 iterations).
+
+**Install to your repo:**
+```bash
+./codex-review-loop/install.sh
+```
+
 ## Installation
 
 ```bash
