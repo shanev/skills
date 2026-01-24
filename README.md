@@ -40,11 +40,11 @@ Automated review-and-fix loop for Codex CLI.
 ./review-loop.sh
 ```
 
-Runs `/review`, fixes issues, and repeats until clean (max 3 iterations).
+Runs `/review`, fixes issues, and repeats until clean (max 3 iterations). Similar to a [Ralph Wiggum loop](https://github.com/anthropics/claude-code/tree/main/plugins/ralph-wiggum) but specialized for code review workflows.
 
 **Install to your repo:**
 ```bash
-./codex-review-loop/install.sh
+curl -sSL https://raw.githubusercontent.com/shanev/skills/main/codex-review-loop/review-loop.sh -o review-loop.sh && chmod +x review-loop.sh
 ```
 
 ## Installation
