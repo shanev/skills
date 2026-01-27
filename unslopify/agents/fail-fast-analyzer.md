@@ -41,7 +41,7 @@ If there are commits ahead, get the branch diff:
 git diff origin/main...HEAD
 ```
 
-Filter for: `*.ts`, `*.tsx`, `*.go`, `*.rs`, `*.py`
+Filter for: `*.ts`, `*.tsx`, `*.go`, `*.rs`, `*.py`, `*.swift`
 
 If all diffs are empty, report "No changes to analyze."
 
@@ -291,6 +291,96 @@ def process(data):
 | `.get(key, default)` for required values | Hides missing data |
 | `getattr(obj, attr, None)` patterns | Masks missing attributes |
 | `assert` for validation | Disabled in production |
+
+### 12. Swift: Force Unwrap Hiding Missing Data
+
+```swift
+// Bad: force unwrap hides nil case
+let user = users.first!  // crashes if empty
+let name = dictionary["name"] as! String  // crashes if missing or wrong type
+
+// Good: fail explicitly
+guard let user = users.first else {
+    throw AppError.noUsersFound
+}
+guard let name = dictionary["name"] as? String else {
+    throw AppError.missingField("name")
+}
+```
+
+### 13. Swift: try? Swallowing Errors
+
+```swift
+// Bad: silently converting to nil
+let data = try? JSONDecoder().decode(User.self, from: jsonData)
+// Why did decoding fail? We'll never know
+
+// Good: handle or propagate error
+do {
+    let data = try JSONDecoder().decode(User.self, from: jsonData)
+} catch {
+    logger.error("Failed to decode user: \(error)")
+    throw AppError.decodingFailed(error)
+}
+```
+
+### 14. Swift: Optional Chaining That Hides Bugs
+
+```swift
+// Bad: excessive optional chaining hides issues
+let city = user?.address?.city ?? "Unknown"  // why is anything nil?
+
+// Good: validate required data exists
+guard let user = user,
+      let address = user.address else {
+    throw AppError.invalidUserData
+}
+let city = address.city
+```
+
+### 15. Swift: Catch-All Error Handlers
+
+```swift
+// Bad: catching all errors
+do {
+    try riskyOperation()
+} catch {
+    return nil  // swallows all errors including programming errors
+}
+
+// Good: catch specific errors
+do {
+    try riskyOperation()
+} catch NetworkError.timeout {
+    // handle timeout specifically
+} catch NetworkError.unauthorized {
+    // handle auth error specifically
+} catch {
+    // log unexpected error and rethrow
+    logger.error("Unexpected error: \(error)")
+    throw error
+}
+```
+
+### 16. Swift: fatalError in Library Code
+
+```swift
+// Bad: fatalError in production code
+func process(_ value: Int) -> String {
+    guard value > 0 else {
+        fatalError("Value must be positive")  // crashes app!
+    }
+    return String(value)
+}
+
+// Good: return Result or throw
+func process(_ value: Int) throws -> String {
+    guard value > 0 else {
+        throw ValidationError.invalidValue("Value must be positive")
+    }
+    return String(value)
+}
+```
 
 ## Confidence Scoring
 

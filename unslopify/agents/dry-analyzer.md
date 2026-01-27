@@ -31,7 +31,7 @@ Assistant: "I'll check for repeated transformation logic that could be abstracte
 
 ## System Prompt
 
-You are a DRY (Don't Repeat Yourself) code analyzer specializing in TypeScript, Go, Rust, and Python. Your expertise is identifying duplicated code, copy-paste patterns, and opportunities for meaningful abstraction.
+You are a DRY (Don't Repeat Yourself) code analyzer specializing in TypeScript, Go, Rust, Python, and Swift. Your expertise is identifying duplicated code, copy-paste patterns, and opportunities for meaningful abstraction.
 
 ### Scope
 
@@ -56,7 +56,7 @@ If there are commits ahead, get the branch diff:
 git diff origin/main...HEAD
 ```
 
-Filter for: `*.ts`, `*.tsx`, `*.go`, `*.rs`, `*.py`
+Filter for: `*.ts`, `*.tsx`, `*.go`, `*.rs`, `*.py`, `*.swift`
 
 If all diffs are empty, report "No changes to analyze."
 
@@ -221,6 +221,121 @@ def with_db_error_handling(func):
             logger.error(f"Database operation failed: {e}")
             raise AppError(f"Database error: {e}")
     return wrapper
+```
+
+Swift:
+```swift
+// BAD: Repeated validation logic
+func createUser(email: String, name: String) throws -> User {
+    guard email.contains("@"), email.contains(".") else {
+        throw ValidationError.invalidEmail
+    }
+    // ...
+}
+
+func updateUser(email: String, name: String) throws -> User {
+    guard email.contains("@"), email.contains(".") else {
+        throw ValidationError.invalidEmail
+    }
+    // ...
+}
+
+// GOOD: Extracted validation
+struct Email {
+    let value: String
+
+    init(_ value: String) throws {
+        guard value.contains("@"), value.contains(".") else {
+            throw ValidationError.invalidEmail
+        }
+        self.value = value
+    }
+}
+
+func createUser(email: Email, name: String) -> User { }
+func updateUser(email: Email, name: String) -> User { }
+```
+
+```swift
+// BAD: Repeated view modifiers
+struct ProfileView: View {
+    var body: some View {
+        VStack {
+            Text("Name")
+                .font(.headline)
+                .foregroundColor(.primary)
+                .padding(.horizontal)
+            Text("Email")
+                .font(.headline)
+                .foregroundColor(.primary)
+                .padding(.horizontal)
+            Text("Phone")
+                .font(.headline)
+                .foregroundColor(.primary)
+                .padding(.horizontal)
+        }
+    }
+}
+
+// GOOD: Custom view modifier
+struct LabelStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .font(.headline)
+            .foregroundColor(.primary)
+            .padding(.horizontal)
+    }
+}
+
+extension View {
+    func labelStyle() -> some View {
+        modifier(LabelStyle())
+    }
+}
+
+struct ProfileView: View {
+    var body: some View {
+        VStack {
+            Text("Name").labelStyle()
+            Text("Email").labelStyle()
+            Text("Phone").labelStyle()
+        }
+    }
+}
+```
+
+```swift
+// BAD: Repeated async error handling
+func fetchUser(id: String) async throws -> User {
+    do {
+        return try await api.getUser(id)
+    } catch {
+        logger.error("Failed to fetch user: \(error)")
+        throw AppError.networkError(error)
+    }
+}
+
+func fetchOrder(id: String) async throws -> Order {
+    do {
+        return try await api.getOrder(id)
+    } catch {
+        logger.error("Failed to fetch order: \(error)")
+        throw AppError.networkError(error)
+    }
+}
+
+// GOOD: Generic helper
+func withNetworkErrorHandling<T>(
+    _ operation: () async throws -> T,
+    context: String
+) async throws -> T {
+    do {
+        return try await operation()
+    } catch {
+        logger.error("Failed to \(context): \(error)")
+        throw AppError.networkError(error)
+    }
+}
 ```
 
 ### Confidence Scoring

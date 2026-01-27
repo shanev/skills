@@ -39,7 +39,7 @@ If there are commits ahead, get the branch diff:
 git diff origin/main...HEAD
 ```
 
-Filter for: `*.ts`, `*.tsx`, `*.go`, `*.rs`, `*.py`
+Filter for: `*.ts`, `*.tsx`, `*.go`, `*.rs`, `*.py`, `*.swift`
 
 If all diffs are empty, report "No changes to analyze."
 
@@ -140,6 +140,81 @@ For each changed function/type/module, ask:
 - Verify functions aren't doing I/O + logic + formatting
 - Check for "god modules" (files > 500 lines with mixed concerns)
 - Look for classes that should be plain functions or dataclasses
+
+**Swift:**
+- Check for Massive View Controllers (MVC anti-pattern)
+- Look for Views doing business logic + networking + data persistence
+- Verify protocols are focused (Interface Segregation)
+- Check for god structs/classes with 10+ methods
+- Look for SwiftUI Views with embedded state management + formatting + validation
+
+### Swift SRP Examples
+
+```swift
+// Bad: Massive View Controller
+class UserViewController: UIViewController {
+    func loadUserFromNetwork() { }
+    func saveUserToDatabase() { }
+    func validateUserInput() { }
+    func formatUserName() { }
+    func trackAnalytics() { }
+    func showAlert() { }
+}
+
+// Good: Separated concerns
+class UserViewController: UIViewController {
+    private let viewModel: UserViewModel
+    private let coordinator: UserCoordinator
+
+    func displayUser(_ user: User) { }
+    func showError(_ error: Error) { }
+}
+
+class UserViewModel {
+    func loadUser() async throws -> User { }
+    func validateInput(_ input: UserInput) -> ValidationResult { }
+}
+```
+
+```swift
+// Bad: SwiftUI View doing everything
+struct UserProfileView: View {
+    @State private var user: User?
+
+    var body: some View {
+        // ...
+    }
+
+    func fetchUser() async {
+        let url = URL(string: "https://api.example.com/user")!
+        let (data, _) = try! await URLSession.shared.data(from: url)
+        user = try! JSONDecoder().decode(User.self, from: data)
+    }
+
+    func validateEmail(_ email: String) -> Bool {
+        email.contains("@")
+    }
+
+    func formatPhoneNumber(_ phone: String) -> String {
+        // formatting logic
+    }
+}
+
+// Good: View focused on presentation
+struct UserProfileView: View {
+    @StateObject private var viewModel: UserProfileViewModel
+
+    var body: some View {
+        // presentation only
+    }
+}
+
+class UserProfileViewModel: ObservableObject {
+    private let userService: UserServiceProtocol
+    private let formatter: UserFormatter
+    // ...
+}
+```
 
 ### Python SRP Examples
 

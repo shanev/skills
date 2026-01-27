@@ -58,7 +58,7 @@ If there are commits ahead, get the branch diff:
 git diff origin/main...HEAD
 ```
 
-Filter for: `*.ts`, `*.tsx`, `*.go`, `*.rs`, `*.py`
+Filter for: `*.ts`, `*.tsx`, `*.go`, `*.rs`, `*.py`, `*.swift`
 
 If all diffs are empty, report "No changes to analyze."
 
@@ -180,6 +180,123 @@ For each changed function, ask:
 - Look for `requests`, `httpx`, `aiohttp` in core functions
 - Check for file operations (`open()`, `pathlib`) in business logic
 - Verify database connections aren't passed into pure functions
+
+**Swift:**
+- Check for `async` in pure business logic functions
+- Look for `print()`, `os_log` in calculations
+- Verify `Date()`, `UUID()` are injected, not created inline
+- Look for `URLSession`, `CoreData` in business logic
+- Check for `UserDefaults`, `FileManager` in core functions
+- Verify SwiftUI Views don't contain business logic
+
+### Swift FCIS Examples
+
+```swift
+// Bad: I/O mixed with business logic
+func processOrder(orderId: String) async throws -> OrderResult {
+    let order = try await api.fetchOrder(orderId)  // I/O
+    let total = order.items.reduce(0) { $0 + $1.price }  // Logic
+    let tax = total * 0.1  // Logic
+    try await api.updateOrder(orderId, total: total + tax)  // I/O
+    return OrderResult(total: total + tax)
+}
+
+// Good: separated
+func calculateOrderTotal(items: [Item]) -> Decimal {  // Pure
+    items.reduce(0) { $0 + $1.price }
+}
+
+func calculateTax(amount: Decimal, rate: Decimal = 0.1) -> Decimal {  // Pure
+    amount * rate
+}
+
+func processOrder(orderId: String) async throws -> OrderResult {  // Shell
+    let order = try await api.fetchOrder(orderId)
+    let total = calculateOrderTotal(items: order.items)
+    let tax = calculateTax(amount: total)
+    try await api.updateOrder(orderId, total: total + tax)
+    return OrderResult(total: total + tax)
+}
+```
+
+```swift
+// Bad: non-determinism in core
+func createUser(name: String, email: String) -> User {
+    User(
+        id: UUID(),  // Non-deterministic!
+        name: name,
+        email: email,
+        createdAt: Date()  // Non-deterministic!
+    )
+}
+
+// Good: inject non-determinism
+func createUser(
+    id: UUID,
+    name: String,
+    email: String,
+    createdAt: Date
+) -> User {
+    User(id: id, name: name, email: email, createdAt: createdAt)
+}
+
+// Shell provides non-deterministic values
+func handleCreateUser(name: String, email: String) -> User {
+    createUser(
+        id: UUID(),
+        name: name,
+        email: email,
+        createdAt: Date()
+    )
+}
+```
+
+```swift
+// Bad: SwiftUI View with business logic
+struct OrderView: View {
+    @State private var order: Order?
+
+    var body: some View {
+        // view code
+    }
+
+    func calculateDiscount() -> Decimal {
+        guard let order = order else { return 0 }
+        // Business logic in View!
+        if order.items.count > 5 {
+            return order.total * 0.1
+        }
+        return 0
+    }
+
+    func fetchOrder() async {
+        // I/O in View!
+        order = try? await api.getOrder(id)
+    }
+}
+
+// Good: View delegates to ViewModel
+struct OrderView: View {
+    @StateObject private var viewModel: OrderViewModel
+
+    var body: some View {
+        // presentation only
+    }
+}
+
+class OrderViewModel: ObservableObject {
+    @Published var order: Order?
+
+    private let orderService: OrderServiceProtocol
+    private let discountCalculator: DiscountCalculator
+
+    func loadOrder() async { }  // I/O in shell
+}
+
+struct DiscountCalculator {
+    func calculate(for order: Order) -> Decimal { }  // Pure function
+}
+```
 
 ### Python FCIS Examples
 

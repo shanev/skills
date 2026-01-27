@@ -1,6 +1,6 @@
 ---
 name: type-strictness-analyzer
-description: Analyzes code for type system quality. Detects weak typing (any, interface{}, Any), missing null checks, and opportunities for stronger domain types. Use when reviewing TypeScript, Go, Rust, or Python code for type safety issues.
+description: Analyzes code for type system quality. Detects weak typing (any, interface{}, Any), missing null checks, and opportunities for stronger domain types. Use when reviewing TypeScript, Go, Rust, Python, or Swift code for type safety issues.
 model: inherit
 color: green
 ---
@@ -40,7 +40,7 @@ If there are commits ahead, get the branch diff:
 git diff origin/main...HEAD
 ```
 
-Filter for: `*.ts`, `*.tsx`, `*.go`, `*.rs`, `*.py`
+Filter for: `*.ts`, `*.tsx`, `*.go`, `*.rs`, `*.py`, `*.swift`
 
 If all diffs are empty, report "No changes to analyze."
 
@@ -254,6 +254,90 @@ def get_name(user: User | None) -> str:
     if user is None:
         raise ValueError("User cannot be None")
     return user.name
+```
+
+## Swift Issues to Detect
+
+### 1. Force Unwrapping
+```swift
+// Bad: force unwrap crashes on nil
+let user = users.first!
+let name = user.name!
+
+// Good: safe unwrapping
+guard let user = users.first else {
+    throw UserError.notFound
+}
+let name = user.name ?? "Unknown"
+```
+
+### 2. Implicitly Unwrapped Optionals
+```swift
+// Bad: IUO outside of IBOutlet context
+var networkManager: NetworkManager!
+var database: Database!
+
+// Good: proper initialization
+let networkManager: NetworkManager
+let database: Database
+
+init(networkManager: NetworkManager, database: Database) {
+    self.networkManager = networkManager
+    self.database = database
+}
+```
+
+### 3. `Any` and `AnyObject` Usage
+```swift
+// Bad: losing type information
+func process(data: Any) -> Any {
+    // ...
+}
+
+// Good: generics or protocols
+func process<T: Processable>(data: T) -> T.Output {
+    // ...
+}
+```
+
+### 4. Stringly-Typed APIs
+```swift
+// Bad: strings for identifiers
+func getUser(id: String) -> User?
+func getOrder(id: String) -> Order?
+
+// Good: type-safe identifiers
+struct UserID: Hashable, Codable {
+    let rawValue: String
+}
+struct OrderID: Hashable, Codable {
+    let rawValue: String
+}
+func getUser(id: UserID) -> User?
+func getOrder(id: OrderID) -> Order?
+```
+
+### 5. Missing Result Types
+```swift
+// Bad: throwing without typed errors
+func fetchData() throws -> Data
+
+// Good: typed errors with Result
+enum FetchError: Error {
+    case networkUnavailable
+    case invalidResponse
+    case serverError(code: Int)
+}
+func fetchData() -> Result<Data, FetchError>
+```
+
+### 6. Weak Type Constraints
+```swift
+// Bad: overly broad protocol constraint
+func process<T>(item: T) where T: AnyObject
+
+// Good: specific protocol requirements
+func process<T: Identifiable & Codable>(item: T)
 ```
 
 ## Confidence Scoring

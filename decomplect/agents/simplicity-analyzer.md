@@ -38,7 +38,7 @@ If there are commits ahead, get the branch diff:
 git diff origin/main...HEAD
 ```
 
-Filter for: `*.ts`, `*.tsx`, `*.go`, `*.rs`, `*.py`
+Filter for: `*.ts`, `*.tsx`, `*.go`, `*.rs`, `*.py`, `*.swift`
 
 If all diffs are empty, report "No changes to analyze."
 
@@ -98,6 +98,82 @@ For each changed file, ask:
 - Prefer comprehensions and `map`/`filter` over loops with append
 - Avoid global state and module-level mutable variables
 - Use `NamedTuple` or `TypedDict` for structured data instead of plain dicts
+
+**Swift:**
+- Prefer structs over classes (value semantics)
+- Use `let` over `var` whenever possible
+- Avoid `inout` parameters when you can return new values
+- Prefer pure functions over methods with side effects
+- Use immutable data models with Codable
+- Avoid singletons and global state
+- Prefer map/filter/reduce over mutation in loops
+
+### Swift Simplicity Examples
+
+```swift
+// Bad: class with mutable state (complected: value + identity)
+class ShoppingCart {
+    var items: [Item] = []
+
+    func addItem(_ item: Item) {
+        items.append(item)  // mutation
+    }
+}
+
+// Good: struct with value semantics
+struct ShoppingCart {
+    let items: [Item]
+
+    func adding(_ item: Item) -> ShoppingCart {
+        ShoppingCart(items: items + [item])  // returns new value
+    }
+}
+```
+
+```swift
+// Bad: inout parameter mutates external state
+func updateUser(_ user: inout User, name: String) {
+    user.name = name  // action at a distance
+}
+
+// Good: return new value
+func updateUser(_ user: User, name: String) -> User {
+    var updated = user
+    updated.name = name
+    return updated
+}
+```
+
+```swift
+// Bad: singleton with global mutable state
+class AppState {
+    static let shared = AppState()
+    var currentUser: User?
+    var settings: Settings = .default
+}
+
+// Good: explicit dependency injection
+struct AppDependencies {
+    let userService: UserServiceProtocol
+    let settingsService: SettingsServiceProtocol
+}
+```
+
+```swift
+// Bad: mutation in loop
+func transform(items: [String]) -> [String] {
+    var result: [String] = []
+    for item in items {
+        result.append(item.uppercased())  // mutation
+    }
+    return result
+}
+
+// Good: functional transformation
+func transform(items: [String]) -> [String] {
+    items.map { $0.uppercased() }
+}
+```
 
 ### Python Simplicity Examples
 

@@ -37,7 +37,7 @@ If there are commits ahead, get the branch diff:
 git diff origin/main...HEAD
 ```
 
-Filter for: `*.ts`, `*.tsx`, `*.go`, `*.rs`, `*.py`
+Filter for: `*.ts`, `*.tsx`, `*.go`, `*.rs`, `*.py`, `*.swift`
 
 If all diffs are empty, report "No changes to analyze."
 
@@ -145,6 +145,96 @@ For each changed file, check:
 - Look for classes that know too much about other classes' internals
 - Prefer composition over inheritance
 - Use Protocol/ABC for interface segregation
+
+**Swift:**
+- Check for fat protocols with many requirements
+- Look for tight coupling between ViewControllers
+- Verify dependencies are injected, not created inline
+- Check for excessive use of singletons
+- Look for classes reaching into other classes' internals
+- Prefer protocol composition over inheritance
+- Use protocol extensions for shared behavior
+
+### Swift Coupling Examples
+
+```swift
+// Bad: content coupling - accessing internals
+class OrderViewController: UIViewController {
+    var userViewController: UserViewController!
+
+    func getUserEmail() -> String {
+        // Bad: reaching into internals
+        userViewController.userService.database.users.first?.email ?? ""
+    }
+}
+
+// Good: use public interface
+class OrderViewController: UIViewController {
+    var userService: UserServiceProtocol!
+
+    func getUserEmail() -> String {
+        userService.getCurrentUser()?.email ?? ""
+    }
+}
+```
+
+```swift
+// Bad: fat protocol (low cohesion)
+protocol ServiceProtocol {
+    func fetchUser(id: String) async throws -> User
+    func saveUser(_ user: User) async throws
+    func sendEmail(to: String, subject: String, body: String) async throws
+    func logEvent(_ event: String)
+    func cacheData(_ data: Data, key: String)
+    func trackAnalytics(_ event: AnalyticsEvent)
+}
+
+// Good: segregated protocols
+protocol UserFetching {
+    func fetchUser(id: String) async throws -> User
+}
+
+protocol UserPersisting {
+    func saveUser(_ user: User) async throws
+}
+
+protocol EmailSending {
+    func sendEmail(to: String, subject: String, body: String) async throws
+}
+```
+
+```swift
+// Bad: tight coupling via singleton
+class ProfileViewModel {
+    func loadProfile() async {
+        let user = await NetworkManager.shared.fetchUser()  // tight coupling
+        let settings = SettingsManager.shared.getSettings()  // tight coupling
+    }
+}
+
+// Good: dependency injection
+class ProfileViewModel {
+    private let userService: UserServiceProtocol
+    private let settingsService: SettingsServiceProtocol
+
+    init(userService: UserServiceProtocol, settingsService: SettingsServiceProtocol) {
+        self.userService = userService
+        self.settingsService = settingsService
+    }
+}
+```
+
+```swift
+// Bad: stamp coupling - passing whole object when only needing part
+func formatGreeting(user: User) -> String {
+    "Hello, \(user.name)"  // only needs name
+}
+
+// Good: data coupling - pass only what's needed
+func formatGreeting(name: String) -> String {
+    "Hello, \(name)"
+}
+```
 
 ### Python Coupling Examples
 
