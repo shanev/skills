@@ -32,21 +32,6 @@ Tactical code cleanup for immediate quality issues.
 
 [Read more →](unslopify/README.md)
 
-### [Codex Review Loop](codex-review-loop/)
-
-Automated review-and-fix loop for Codex CLI.
-
-```bash
-./review-loop.sh
-```
-
-Runs `/review`, fixes issues, and repeats until clean (max 3 iterations). Similar to a [Ralph Wiggum loop](https://github.com/anthropics/claude-code/tree/main/plugins/ralph-wiggum) but specialized for code review workflows.
-
-**Install to your repo:**
-```bash
-curl -sSL https://raw.githubusercontent.com/shanev/skills/main/codex-review-loop/review-loop.sh -o review-loop.sh && chmod +x review-loop.sh
-```
-
 ## Installation
 
 ```bash

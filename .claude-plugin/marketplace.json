@@ -7,11 +7,15 @@
   "plugins": [
     {
       "name": "decomplect",
-      "source": "./decomplect"
+      "source": "./decomplect",
+      "displayName": "Decomplect",
+      "defaultEnabled": true
     },
     {
       "name": "unslopify",
-      "source": "./unslopify"
+      "source": "./unslopify",
+      "displayName": "Unslopify",
+      "defaultEnabled": true
     }
   ]
 }
