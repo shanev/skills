@@ -59,6 +59,14 @@ Runs 4 analyzers in parallel to detect sloppy code patterns.
 
 ## Installation
 
+Install globally for all supported coding agents:
+
+```bash
+npx skills add shanev/skills --skill unslopify --agent '*' -g -y
+```
+
+For Claude Code's plugin marketplace:
+
 ```bash
 /plugin marketplace add shanev/skills
 /plugin install unslopify@shanev-skills

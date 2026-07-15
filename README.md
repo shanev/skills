@@ -1,6 +1,8 @@
-# Shane's Claude Code Skills
+# Shane's Agent Skills
 
-A collection of skills for Claude Code to enhance development workflows.
+A collection of reusable coding-agent skills for code quality and architecture.
+They use the open `SKILL.md` format and can be installed for Codex, Claude Code,
+Cursor, GitHub Copilot, OpenCode, and other supported agents.
 
 ## Available Skills
 
@@ -34,13 +36,34 @@ Tactical code cleanup for immediate quality issues.
 
 ## Installation
 
+Install every skill globally for all supported coding agents with the
+[Vercel Labs Skills CLI](https://github.com/vercel-labs/skills):
+
+```bash
+npx skills add shanev/skills --all -g
+```
+
+Or install one skill globally for all supported agents:
+
+```bash
+npx skills add shanev/skills --skill decomplect --agent '*' -g -y
+npx skills add shanev/skills --skill unslopify --agent '*' -g -y
+```
+
+Omit `-g` to install into the current project instead of your user-level agent
+directories. The CLI uses symlinks by default so each agent shares one canonical
+copy of a skill.
+
+### Claude Code plugin marketplace
+
+Claude Code users can alternatively install the skills as plugins:
+
 ```bash
 /plugin marketplace add shanev/skills
 
 # Install what you need
 /plugin install decomplect@shanev-skills
 /plugin install unslopify@shanev-skills
-/plugin install tmux-task-runner@shanev-skills
 ```
 
 Verify installation:
@@ -57,4 +80,4 @@ Once installed, use the commands directly:
 /unslopify     # Tactical cleanup
 ```
 
-Or let Claude invoke them based on your requests.
+Or ask your coding agent to apply a skill by name.

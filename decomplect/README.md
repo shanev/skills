@@ -53,6 +53,14 @@ Runs 3 analyzers in parallel to evaluate architectural quality.
 
 ## Installation
 
+Install globally for all supported coding agents:
+
+```bash
+npx skills add shanev/skills --skill decomplect --agent '*' -g -y
+```
+
+For Claude Code's plugin marketplace:
+
 ```bash
 /plugin marketplace add shanev/skills
 /plugin install decomplect@shanev-skills
