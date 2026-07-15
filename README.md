@@ -1,38 +1,39 @@
 # Shane's Agent Skills
 
-A collection of reusable coding-agent skills for code quality and architecture.
+A collection of language-agnostic coding-agent skills for code quality and architecture.
 They use the open `SKILL.md` format and can be installed for Codex, Claude Code,
 Cursor, GitHub Copilot, OpenCode, and other supported agents.
 
 ## Available Skills
 
-### [Decomplect](decomplect/)
+### [Decomplect](docs/decomplect.md)
 
-Architectural code analysis for design quality.
+Architecture review based on semantic design costs rather than language-specific syntax.
 
 ```
 /decomplect
 ```
 
-- **Simplicity** - Values over state, decomplected concerns
-- **FCIS** - Functional core, imperative shell
-- **Coupling** - High cohesion, low coupling
+- **Simplicity** - Separate independent concerns and expose hidden context
+- **FCIS** - Separate deterministic policy from effects where it pays off
+- **Coupling** - Align cohesion, boundaries, and dependency direction
 
-[Read more →](decomplect/README.md)
+[View skill source →](decomplect/SKILL.md)
 
-### [Unslopify](unslopify/)
+### [Unslopify](docs/unslopify.md)
 
-Tactical code cleanup for immediate quality issues.
+Evidence-first tactical review of contracts, responsibilities, failures, and duplication.
 
 ```
 /unslopify
 ```
 
-- **Type Strictness** - No `any`, domain types
-- **SRP** - Single responsibility, no god classes
-- **Fail-Fast** - No workarounds, no silent fallbacks
+- **Contract Strength** - Express and enforce valid states idiomatically
+- **Responsibility** - Keep independent change vectors separate
+- **Failure Integrity** - Make recovery, degradation, and failure explicit
+- **DRY** - Remove duplicated knowledge without premature abstraction
 
-[Read more →](unslopify/README.md)
+[View skill source →](unslopify/SKILL.md)
 
 ## Installation
 
@@ -73,11 +74,20 @@ Verify installation:
 
 ## Usage
 
-Once installed, use the commands directly:
+Ask your coding agent to apply a skill by name:
+
+```text
+Use decomplect to review the architecture of this branch.
+Use unslopify on src/payments and focus on failure handling.
+```
+
+Claude Code plugin users can also invoke the slash commands directly:
 
 ```
-/decomplect    # Architectural analysis
-/unslopify     # Tactical cleanup
+/decomplect:decomplect    # Architectural analysis
+/unslopify:unslopify      # Tactical cleanup
 ```
 
-Or ask your coding agent to apply a skill by name.
+Both skills accept explicit files, directories, diffs, commits, branches, or whole-repository
+scopes. They work across programming languages by evaluating behavior and contracts relative
+to the repository's own ecosystem.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Decomplect"
+  short_description: "Review architecture for costly complexity"
+  default_prompt: "Use $decomplect to review this code for accidental complexity and harmful coupling."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Unslopify"
+  short_description: "Find concrete code-quality risks"
+  default_prompt: "Use $unslopify to review this code for weak contracts, hidden failures, and duplication."

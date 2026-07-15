@@ -1,0 +1,174 @@
+{
+  "decomplect": [
+    {
+      "id": "simplicity-positive-hidden-context",
+      "analyzer": "simplicity",
+      "kind": "positive",
+      "request": "Review this function for architectural simplicity.",
+      "artifact": "def quote(order): global current_tenant; rate = ENV['RATE']; current_tenant.last_quote = order.total * rate; return current_tenant.last_quote",
+      "expectation": "Report hidden ambient configuration and shared mutable identity intertwined with deterministic quote policy."
+    },
+    {
+      "id": "simplicity-clean-explicit-values",
+      "analyzer": "simplicity",
+      "kind": "clean",
+      "request": "Review this function for architectural simplicity.",
+      "artifact": "quote = (order, rate) => Money(order.subtotal * rate)",
+      "expectation": "No qualifying finding; dependencies and output are explicit."
+    },
+    {
+      "id": "simplicity-trap-local-mutation",
+      "analyzer": "simplicity",
+      "kind": "trap",
+      "request": "Review this sorting routine for architectural simplicity.",
+      "artifact": "A private in-place partition loop mutates only a newly allocated local buffer and returns an immutable result.",
+      "expectation": "Do not report mutation by itself; it is local, encapsulated, and does not intertwine independent concerns."
+    },
+    {
+      "id": "functional-core-positive-policy-in-handler",
+      "analyzer": "functional-core",
+      "kind": "positive",
+      "request": "Review this request handler with the functional-core lens.",
+      "artifact": "func Handle(w, r) { order := db.Load(r.ID); total := 0; for _, item := range order.Items { total += item.Price * item.Qty }; if order.VIP { total *= 0.9 }; db.Save(total); json.Encode(w, total) }",
+      "expectation": "Report deterministic pricing policy embedded between database and transport effects, with a concrete testing cost."
+    },
+    {
+      "id": "functional-core-clean-separated-policy",
+      "analyzer": "functional-core",
+      "kind": "clean",
+      "request": "Review this request path with the functional-core lens.",
+      "artifact": "The handler loads an Order, calls calculateTotal(order, pricingRules), persists the returned Total, and maps it to the response.",
+      "expectation": "No qualifying finding; policy and effects already have a useful boundary."
+    },
+    {
+      "id": "functional-core-trap-crud-adapter",
+      "analyzer": "functional-core",
+      "kind": "trap",
+      "request": "Review this endpoint with the functional-core lens.",
+      "artifact": "The endpoint validates a generated identifier, calls repository.find(identifier), and serializes the returned record without domain decisions.",
+      "expectation": "Do not demand a pure core where there is no meaningful policy to extract."
+    },
+    {
+      "id": "coupling-positive-inward-vendor-dependency",
+      "analyzer": "coupling",
+      "kind": "positive",
+      "request": "Review this domain module for coupling.",
+      "artifact": "class RenewalPolicy { private let sql = VendorSQLClient.shared; func eligible(id) { let row = sql.query(...); return row.plan == 'annual' } }",
+      "expectation": "Report domain policy coupled directly to vendor storage and ambient lifecycle, explaining the change and test cost."
+    },
+    {
+      "id": "coupling-clean-focused-contract",
+      "analyzer": "coupling",
+      "kind": "clean",
+      "request": "Review these modules for coupling.",
+      "artifact": "RenewalPolicy receives a focused CustomerPlan value from an adapter and returns an Eligibility decision; no storage concepts cross the boundary.",
+      "expectation": "No qualifying finding; the explicit data dependency matches conceptual ownership."
+    },
+    {
+      "id": "coupling-trap-direct-stable-dependency",
+      "analyzer": "coupling",
+      "kind": "trap",
+      "request": "Review this formatter for coupling.",
+      "artifact": "A package-private report formatter directly constructs a package-private escaping helper used nowhere else; both change and ship together.",
+      "expectation": "Do not prescribe dependency injection or an interface without an independent change or testing cost."
+    }
+  ],
+  "unslopify": [
+    {
+      "id": "contracts-positive-invalid-state",
+      "analyzer": "contracts",
+      "kind": "positive",
+      "request": "Review this model's contracts.",
+      "artifact": "data class Payment(val succeeded: Boolean, val failed: Boolean, val error: String?, val receipt: Receipt?)",
+      "expectation": "Report representable contradictory states and recommend an idiomatic mutually exclusive state model."
+    },
+    {
+      "id": "contracts-clean-dynamic-boundary",
+      "analyzer": "contracts",
+      "kind": "clean",
+      "request": "Review this dynamic-language API boundary.",
+      "artifact": "A Ruby endpoint validates incoming hashes with a schema, converts them to a tested domain value, and passes only that value inward.",
+      "expectation": "No qualifying finding; runtime schema validation is an appropriate contract mechanism."
+    },
+    {
+      "id": "contracts-trap-generic-serializer",
+      "analyzer": "contracts",
+      "kind": "trap",
+      "request": "Review this generic serialization helper.",
+      "artifact": "serialize(value: Any) accepts arbitrary supported runtime values, rejects unsupported cases exhaustively, and returns a typed EncodingResult.",
+      "expectation": "Do not report the broad input type when arbitrary values are the intentional contract and are validated."
+    },
+    {
+      "id": "responsibility-positive-independent-change-vectors",
+      "analyzer": "responsibility",
+      "kind": "positive",
+      "request": "Review this function for single responsibility.",
+      "artifact": "create_order parses HTTP, applies regional pricing and fraud policy, writes SQL, formats a PDF invoice, and sends marketing email.",
+      "expectation": "Report independent policy and delivery change vectors with concrete testing and ownership costs."
+    },
+    {
+      "id": "responsibility-clean-cohesive-use-case",
+      "analyzer": "responsibility",
+      "kind": "clean",
+      "request": "Review this application service for single responsibility.",
+      "artifact": "CreateOrder coordinates validation, pricing, repository save, and event publication through collaborators for one atomic use case; policy lives in those collaborators.",
+      "expectation": "No qualifying finding; orchestration steps support one coherent use case."
+    },
+    {
+      "id": "responsibility-trap-large-parser",
+      "analyzer": "responsibility",
+      "kind": "trap",
+      "request": "Review this 700-line parser for single responsibility.",
+      "artifact": "The module implements one grammar production family, is generated from one grammar source, and changes only when that grammar changes.",
+      "expectation": "Do not report size alone; the unit has one demonstrated reason to change."
+    },
+    {
+      "id": "failure-positive-false-success",
+      "analyzer": "failure-integrity",
+      "kind": "positive",
+      "request": "Review this error handling.",
+      "artifact": "try { repository.save(order) } catch (error) { logger.warn(error) }; return Response.ok({ saved: true })",
+      "expectation": "Report the swallowed persistence failure and false success observed by the caller."
+    },
+    {
+      "id": "failure-clean-explicit-boundary",
+      "analyzer": "failure-integrity",
+      "kind": "clean",
+      "request": "Review this boundary error handling.",
+      "artifact": "A top-level request boundary catches unknown failures, records cause and request context, rolls back, and returns a documented generic 500 response.",
+      "expectation": "No qualifying finding; a broad catch is deliberate and complete at this containment boundary."
+    },
+    {
+      "id": "failure-trap-cache-fallback",
+      "analyzer": "failure-integrity",
+      "kind": "trap",
+      "request": "Review this fallback.",
+      "artifact": "On a cache miss, the service reads the authoritative store, records miss metrics, populates the cache with a bounded timeout, and returns the authoritative value.",
+      "expectation": "Do not report a valid, observable cache fallback as hidden failure."
+    },
+    {
+      "id": "duplication-positive-shared-rule",
+      "analyzer": "duplication",
+      "kind": "positive",
+      "request": "Review these services for DRY violations.",
+      "artifact": "Checkout and Refund independently encode the same jurisdiction-to-tax-rate table; one contains a newly changed rate while the other retains the old rate.",
+      "expectation": "Report duplicated domain knowledge with observed divergence and recommend one owned source of truth."
+    },
+    {
+      "id": "duplication-clean-shared-source",
+      "analyzer": "duplication",
+      "kind": "clean",
+      "request": "Review these consumers for DRY violations.",
+      "artifact": "Checkout and Refund call the same TaxPolicy contract; each contains only distinct orchestration for its use case.",
+      "expectation": "No qualifying finding; shared knowledge already has one owner."
+    },
+    {
+      "id": "duplication-trap-similar-independent-code",
+      "analyzer": "duplication",
+      "kind": "trap",
+      "request": "Review these calculations for DRY violations.",
+      "artifact": "A graphics module and a shipping module each multiply width by height; the concepts have separate owners, units, tests, and change histories.",
+      "expectation": "Do not extract coincidentally similar syntax across independent domains."
+    }
+  ]
+}

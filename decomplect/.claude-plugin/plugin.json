@@ -1,7 +1,7 @@
 {
   "name": "decomplect",
-  "version": "2.3.0",
-  "description": "Architectural code analysis using Rich Hickey's decomplection principles. Evaluates simplicity, functional core/imperative shell, and coupling.",
+  "version": "3.0.0",
+  "description": "Language-agnostic architecture review for simplicity, functional core/imperative shell, cohesion, and coupling.",
   "author": {
     "name": "Shane Vitarana",
     "url": "https://github.com/shanev"
@@ -14,10 +14,7 @@
     "./agents/fcis-analyzer.md",
     "./agents/coupling-analyzer.md"
   ],
-  "commands": [
-    "./commands/decomplect.md"
-  ],
   "skills": [
-    "./SKILL.md"
+    "./"
   ]
 }
